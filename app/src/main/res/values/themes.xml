@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.HATV" parent="" >
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.SplashScreenTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_banner_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimationDuration">996</item>
+        <item name="postSplashScreenTheme">@style/Theme.HATV</item>
+    </style>
+</resources>
