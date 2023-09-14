@@ -21,6 +21,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.muedsa.compose.tv.model.ContentModel
+import com.muedsa.compose.tv.model.KeyModel
 import com.muedsa.compose.tv.theme.TvTheme
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -68,7 +69,7 @@ fun <T> ImageCardsRow(
                 if (index == 0) {
                     modifier = modifier.focusRequester(firstItemFocusRequester)
                 }
-                item {
+                item(key = if (it is KeyModel ) it.key else null) {
                     ImageContentCard(
                         modifier = modifier,
                         url = imageFn(it),
@@ -116,7 +117,7 @@ fun <T> StandardImageCardsRow(
             contentPadding = PaddingValues(end = 100.dp)
         ) {
             modelList.forEachIndexed { index, it ->
-                item {
+                item(key = if (it is KeyModel ) it.key else null) {
                     ImageContentCard(
                         modifier = Modifier
                             .width(215.dp)

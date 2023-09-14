@@ -2,8 +2,12 @@ package com.muedsa.hatv.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.muedsa.hatv.ui.features.detail.VideoDetailScreen
+import com.muedsa.hatv.ui.features.home.HomeScreen
 import com.muedsa.hatv.ui.features.others.NotFoundScreen
 
 @Composable
@@ -11,11 +15,20 @@ fun AppNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = NavigationItems.Home.path) {
 
         composable(NavigationItems.Home.path) {
-            NotFoundScreen()
+            HomeScreen(
+                onNavigate = { navItem, pathParams ->
+                    onNavigate(navController, navItem, pathParams)
+                }
+            )
         }
 
-        composable(NavigationItems.Detail.path) {
-            NotFoundScreen()
+        composable(
+            NavigationItems.Detail.path,
+            arguments = listOf(navArgument("videoId") {
+                type = NavType.StringType
+            })
+        ) {
+            VideoDetailScreen()
         }
 
         composable(NavigationItems.NotFound.path) {

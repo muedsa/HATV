@@ -6,7 +6,7 @@ sealed class NavigationItems(
 ) {
     data object Home : NavigationItems("home")
 
-    data object Detail : NavigationItems("detail")
+    data object Detail : NavigationItems("detail/{videoId}", listOf("{videoId}"))
 
     data object NotFound : NavigationItems("not_found")
 }

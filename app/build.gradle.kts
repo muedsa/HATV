@@ -57,6 +57,11 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
+    implementation(libs.runtime)
+    implementation(libs.runtime.livedata)
+    implementation(libs.runtime.rxjava3)
+    implementation(libs.ui)
+    implementation(libs.ui)
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
@@ -88,8 +93,10 @@ dependencies {
 
     implementation(libs.akdanmaku)
 
-    implementation(libs.datastore.preferences)
-    implementation(libs.datastore.preferences.rxjava3)
+    implementation(libs.rxjava3)
+    implementation(libs.rxjava3.android)
+
+    implementation(libs.jsoup)
 }
 
 kapt {
