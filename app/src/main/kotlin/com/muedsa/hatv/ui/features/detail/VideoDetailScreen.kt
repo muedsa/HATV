@@ -1,6 +1,7 @@
 package com.muedsa.hatv.ui.features.detail
 
 import android.content.Intent
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -13,8 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.LocalSaveableStateRegistry
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -38,7 +37,6 @@ import com.muedsa.compose.tv.widget.StandardImageCardsRow
 import com.muedsa.compose.tv.widget.rememberScreenBackgroundState
 import com.muedsa.hatv.PlaybackActivity
 import com.muedsa.hatv.model.VideoInfoModel
-import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.VideoDetailViewModel
 import timber.log.Timber
 
@@ -66,6 +64,10 @@ fun VideoDetailScreen(
         ScreenBackground(backgroundState)
         TvLazyColumn(Modifier.offset(x = 50.dp)) {
             item {
+                // 占位锚点 使之可以通过Dpad返回页面的顶部
+                Spacer(modifier = Modifier.focusable())
+            }
+            item {
                 ContentBlock(
                     modifier = Modifier
                         .offset(x = 8.dp)
@@ -85,7 +87,9 @@ fun VideoDetailScreen(
                     Button(
                         modifier = Modifier.focusRequester(playButtonFocusRequester),
                         onClick = {
-                            context.startActivity(Intent(context, PlaybackActivity::class.java))
+                            val intent = Intent(context, PlaybackActivity::class.java)
+                            intent.putExtra(PlaybackActivity.MEDIA_URL_KEY, videoDetail.playUrl)
+                            context.startActivity(intent)
                         },
                         contentPadding = ButtonDefaults.ButtonWithIconContentPadding
                     ) {

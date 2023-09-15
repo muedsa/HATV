@@ -4,28 +4,37 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Card
 import androidx.tv.material3.ExperimentalTvMaterial3Api
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.muedsa.compose.tv.model.ContentModel
+import com.muedsa.compose.tv.theme.CardContentPadding
+import com.muedsa.compose.tv.theme.HorizontalPosterSize
 import com.muedsa.compose.tv.theme.TvTheme
+import com.muedsa.compose.tv.theme.VerticalPosterSize
+import timber.log.Timber
 
 @Composable
 fun ImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
+    imageSize: DpSize,
     type: CardType = CardType.STANDARD,
     model: ContentModel? = null,
     onItemFocus: () -> Unit = {},
@@ -36,6 +45,7 @@ fun ImageContentCard(
         ImageCard(
             modifier = modifier,
             url = url,
+            imageSize = imageSize,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
         )
@@ -43,6 +53,7 @@ fun ImageContentCard(
         StandardImageContentCard(
             modifier = modifier,
             url = url,
+            imageSize = imageSize,
             model = model,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
@@ -51,6 +62,7 @@ fun ImageContentCard(
         CompactImageContentCard(
             modifier = modifier,
             url = url,
+            imageSize = imageSize,
             model = model,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
@@ -59,6 +71,7 @@ fun ImageContentCard(
         WideStandardImageContentCard(
             modifier = modifier,
             url = url,
+            imageSize = imageSize,
             model = model,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
@@ -77,14 +90,14 @@ enum class CardType {
 fun ImageCard(
     modifier: Modifier = Modifier,
     url: String,
+    imageSize: DpSize,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
     content: @Composable () -> Unit = {}
 ) {
     Card(onClick = { onItemClick() },
         modifier = modifier
-            .padding(10.dp)
-            .aspectRatio(16f / 9f)
+            .size(imageSize)
             .onFocusChanged {
                 if (it.isFocused) {
                     onItemFocus()
@@ -92,9 +105,15 @@ fun ImageCard(
             }
     ) {
         Box {
-            AsyncImage(
+            SubcomposeAsyncImage(
                 modifier = Modifier.fillMaxSize(),
-                model = url,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(url)
+                    .crossfade(true)
+                    .listener(onError = { _, result ->
+                        Timber.d(result.throwable, "loading image error")
+                    })
+                    .build(),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds
             )
@@ -107,15 +126,22 @@ fun ImageCard(
 fun StandardImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
+    imageSize: DpSize,
     model: ContentModel,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
 ) {
     Column(modifier) {
-        ImageCard(Modifier.fillMaxWidth(), url, onItemFocus, onItemClick)
+        ImageCard(
+            modifier = Modifier.width(imageSize.width),
+            url,
+            imageSize,
+            onItemFocus,
+            onItemClick
+        )
         ContentBlock(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(imageSize.width)
                 .padding(
                     start = 8.dp,
                     top = 0.dp,
@@ -135,16 +161,17 @@ fun StandardImageContentCard(
 fun CompactImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
+    imageSize: DpSize,
     model: ContentModel,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
 ) {
-    ImageCard(modifier, url, onItemFocus, onItemClick) {
+    ImageCard(modifier, url, imageSize, onItemFocus, onItemClick) {
         ContentBlock(
             modifier = Modifier
-                .fillMaxWidth(0.65f)
+                .fillMaxWidth(0.9f)
                 .fillMaxHeight()
-                .padding(8.dp),
+                .padding(CardContentPadding),
             model = model,
             type = ContentBlockType.CARD,
             verticalArrangement = Arrangement.Bottom,
@@ -158,21 +185,17 @@ fun CompactImageContentCard(
 fun WideStandardImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
+    imageSize: DpSize,
     model: ContentModel,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
 ) {
     Row(modifier) {
-        ImageCard(Modifier.weight(1f), url, onItemFocus, onItemClick)
+        ImageCard(Modifier, url, imageSize, onItemFocus, onItemClick)
         ContentBlock(
             modifier = Modifier
-                .weight(1f)
-                .padding(
-                    start = 8.dp,
-                    top = 8.dp,
-                    end = 8.dp,
-                    bottom = 8.dp
-                ),
+                .size(imageSize)
+                .padding(CardContentPadding),
             model = model,
             type = ContentBlockType.CARD,
             verticalArrangement = Arrangement.Top
@@ -185,7 +208,15 @@ fun WideStandardImageContentCard(
 @Composable
 fun NoContentImageContentCardPreview() {
     TvTheme {
-        ImageContentCard(url = "", type = CardType.STANDARD)
+        ImageContentCard(url = "", imageSize = HorizontalPosterSize)
+    }
+}
+
+@Preview
+@Composable
+fun VerticalNoContentImageContentCardPreview() {
+    TvTheme {
+        ImageContentCard(url = "", imageSize = VerticalPosterSize)
     }
 }
 
@@ -195,6 +226,26 @@ fun StandardImageContentCardPreview() {
     TvTheme {
         ImageContentCard(
             url = "",
+            imageSize = HorizontalPosterSize,
+            type = CardType.STANDARD,
+            model = ContentModel(
+                title = "Power Sisters",
+                subtitle = "Superhero/Action • 2022 • 2h 15m",
+                description = "A dynamic duo of superhero siblings " +
+                        "join forces to save their city from a sini" +
+                        "ster villain, redefining sisterhood in action."
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+fun VerticalStandardImageContentCardPreview() {
+    TvTheme {
+        ImageContentCard(
+            url = "",
+            imageSize = VerticalPosterSize,
             type = CardType.STANDARD,
             model = ContentModel(
                 title = "Power Sisters",
@@ -214,6 +265,26 @@ fun WideStandardImageContentCardPreview() {
     TvTheme {
         ImageContentCard(
             url = "",
+            imageSize = HorizontalPosterSize,
+            type = CardType.WIDE_STANDARD,
+            model = ContentModel(
+                title = "Power Sisters",
+                subtitle = "Superhero/Action • 2022 • 2h 15m",
+                description = "A dynamic duo of superhero siblings " +
+                        "join forces to save their city from a sini" +
+                        "ster villain, redefining sisterhood in action."
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+fun VerticalWideStandardImageContentCardPreview() {
+    TvTheme {
+        ImageContentCard(
+            url = "",
+            imageSize = VerticalPosterSize,
             type = CardType.WIDE_STANDARD,
             model = ContentModel(
                 title = "Power Sisters",
@@ -233,6 +304,26 @@ fun CompactImageContentCardPreview() {
     TvTheme {
         ImageContentCard(
             url = "",
+            imageSize = HorizontalPosterSize,
+            type = CardType.COMPACT,
+            model = ContentModel(
+                title = "Power Sisters",
+                subtitle = "Superhero/Action • 2022 • 2h 15m",
+                description = "A dynamic duo of superhero siblings " +
+                        "join forces to save their city from a sini" +
+                        "ster villain, redefining sisterhood in action."
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+fun VerticalCompactImageContentCardPreview() {
+    TvTheme {
+        ImageContentCard(
+            url = "",
+            imageSize = VerticalPosterSize,
             type = CardType.COMPACT,
             model = ContentModel(
                 title = "Power Sisters",

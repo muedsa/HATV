@@ -20,7 +20,7 @@ class HomePageViewModel @Inject internal constructor(
     private val _disposable = CompositeDisposable()
     val videosRows = MutableLiveData<List<VideosRowModel>>()
 
-    fun fetchHomeVideosRows() {
+    private fun fetchHomeVideosRows() {
         repo.fetchHomeVideosRows()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
