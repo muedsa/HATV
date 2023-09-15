@@ -21,16 +21,21 @@ import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.itemsIndexed
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.ImmersiveList
+import androidx.tv.material3.MaterialTheme
 import com.muedsa.compose.tv.model.ContentModel
+import com.muedsa.compose.tv.theme.HorizontalPosterSize
+import com.muedsa.compose.tv.theme.ImageCardRowCardPadding
+import com.muedsa.compose.tv.theme.ScreenPaddingLeft
+import com.muedsa.compose.tv.theme.VerticalPosterSize
 import com.muedsa.compose.tv.widget.ContentBlock
 import com.muedsa.compose.tv.widget.ImageCardsRow
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.compose.tv.widget.StandardImageCardsRow
-import com.muedsa.hatv.viewmodel.HomePageViewModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.ui.features.others.FillTextScreen
 import com.muedsa.hatv.ui.navigation.NavigationItems
+import com.muedsa.hatv.viewmodel.HomePageViewModel
 import timber.log.Timber
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -54,9 +59,22 @@ fun BrowserScreen(
 
     if (videosRows.isNotEmpty()) {
 
+        val firstRowHeight =
+            (MaterialTheme.typography.titleLarge.fontSize.value * configuration.fontScale + 0.5f).dp +
+                    ImageCardRowCardPadding * 3 +
+                    if (videosRows[0].horizontalVideoImage) HorizontalPosterSize.height else VerticalPosterSize.height
+        val tabHeight =
+            (MaterialTheme.typography.labelLarge.fontSize.value * configuration.fontScale + 0.5f).dp +
+                    24.dp * 2 +
+                    6.dp * 2
+
         LaunchedEffect(key1 = Unit) {
             if (videosRows[0].videos.isNotEmpty()) {
-                backgroundState.url = videosRows[0].videos[0].image
+                val video = videosRows[0].videos[0]
+                title = video.title
+                subTitle = video.author
+                description = video.desc
+                backgroundState.url = video.image
                 backgroundState.type = ScreenBackgroundType.SCRIM
             }
         }
@@ -64,7 +82,7 @@ fun BrowserScreen(
         TvLazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .offset(x = 50.dp)
+                .offset(x = ScreenPaddingLeft - ImageCardRowCardPadding)
         ) {
             itemsIndexed(
                 items = videosRows,
@@ -77,9 +95,8 @@ fun BrowserScreen(
                         background = { _, _ ->
                             ContentBlock(
                                 modifier = Modifier
-                                    .offset(x = 8.dp)
                                     .width(screenWidth / 2)
-                                    .height(screenHeight - 150.dp - 75.dp - 48.dp),
+                                    .height(screenHeight - firstRowHeight - tabHeight - 20.dp),
                                 model = contentModel,
                                 descriptionMaxLines = 3
                             )
@@ -89,12 +106,13 @@ fun BrowserScreen(
                             Spacer(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(screenHeight - 150.dp - 75.dp)
+                                    .height(screenHeight - firstRowHeight - tabHeight)
                             )
                             ImageCardsRow(
                                 title = item.title,
                                 modelList = item.videos,
                                 imageFn = VideoInfoModel::image,
+                                imageSize = if (item.horizontalVideoImage) HorizontalPosterSize else VerticalPosterSize,
                                 onItemFocus = { _, video ->
                                     title = video.title
                                     subTitle = video.author
@@ -115,6 +133,7 @@ fun BrowserScreen(
                         title = item.title,
                         modelList = item.videos,
                         imageFn = VideoInfoModel::image,
+                        imageSize = if (item.horizontalVideoImage) HorizontalPosterSize else VerticalPosterSize,
                         contentFn = { ContentModel(it.title, subtitle = it.author) },
                         onItemFocus = { _, video ->
                             title = video.title

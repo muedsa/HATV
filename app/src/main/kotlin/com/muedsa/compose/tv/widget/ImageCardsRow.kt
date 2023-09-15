@@ -51,7 +51,7 @@ fun <T> ImageCardsRow(
 
     Column(modifier) {
         Text(
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = ImageCardRowCardPadding + 8.dp),
             text = title,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleLarge,
@@ -73,7 +73,7 @@ fun <T> ImageCardsRow(
                 },
             state = state,
             contentPadding = PaddingValues(
-                start = 4.dp,
+                start = ImageCardRowCardPadding,
                 bottom = ImageCardRowCardPadding,
                 end = 100.dp
             )
@@ -122,7 +122,7 @@ fun <T> StandardImageCardsRow(
 
     Column(modifier) {
         Text(
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = ImageCardRowCardPadding + 8.dp),
             text = title,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleLarge,
@@ -139,7 +139,7 @@ fun <T> StandardImageCardsRow(
                 },
             state = state,
             contentPadding = PaddingValues(
-                start = 4.dp,
+                start = ImageCardRowCardPadding,
                 bottom = rowBottomPadding,
                 end = 100.dp
             )

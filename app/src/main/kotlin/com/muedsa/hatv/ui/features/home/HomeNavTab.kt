@@ -13,7 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Tab
@@ -22,11 +21,11 @@ import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
-import com.muedsa.hatv.viewmodel.HomePageViewModel
 import com.muedsa.hatv.ui.features.home.browser.BrowserScreen
 import com.muedsa.hatv.ui.features.home.search.SearchScreen
 import com.muedsa.hatv.ui.features.others.NotFoundScreen
 import com.muedsa.hatv.ui.navigation.NavigationItems
+import com.muedsa.hatv.viewmodel.HomePageViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -77,7 +76,7 @@ fun HomeNavTab(
                 ) {
                     Text(
                         tab.title,
-                        fontSize = 18.sp,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         fontWeight = FontWeight.Black,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                     )

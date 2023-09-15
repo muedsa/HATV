@@ -13,23 +13,28 @@ class DemoHARepositoryImpl : IHARepository {
         return Single.just(listOf(
             VideosRowModel(
                 title = "Title One",
-                videos = getDemoVideos()
+                videos = getDemoVideos(false),
+                horizontalVideoImage = false
             ),
             VideosRowModel(
                 title = "Title Two",
-                videos = getDemoVideos()
+                videos = getDemoVideos(false),
+                horizontalVideoImage = false
             ),
             VideosRowModel(
                 title = "Title Three",
-                videos = getDemoVideos()
+                videos = getDemoVideos(false),
+                horizontalVideoImage = false
             ),
             VideosRowModel(
                 title = "Title Four",
-                videos = getDemoVideos()
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
             ),
             VideosRowModel(
                 title = "Title Five",
-                videos = getDemoVideos()
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
             )
         )).delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
     }
