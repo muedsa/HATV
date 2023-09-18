@@ -52,8 +52,8 @@ fun BrowserScreen(
     val screenWidth = configuration.screenWidthDp.dp
 
     var title by remember { mutableStateOf("") }
-    var subTitle by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var subTitle by remember { mutableStateOf<String?>(null) }
+    var description by remember { mutableStateOf<String?>(null) }
 
     val contentModel = ContentModel(title = title, subtitle = subTitle, description = description)
 

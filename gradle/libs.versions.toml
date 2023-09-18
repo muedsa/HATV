@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.0-alpha03"
+agp = "8.3.0-alpha04"
 kotlin = "1.9.0"
 core-ktx = "1.12.0"
 core-splashscreen = "1.0.1"
@@ -18,9 +18,15 @@ timber = "5.0.1"
 media3 = "1.1.1"
 akdanmaku = "1.0.3"
 datastore = "1.1.0-alpha03"
-jsoup = "1.14.3"
+jsoup = "1.16.1"
 rxjava3 = "3.1.7"
 rxjava3-android = "3.0.2"
+junit4 = "4.13.2"
+test-core = "1.6.0-alpha01"
+robolectric = "4.9"
+mockito = "5.5.0"
+mockito-kotlin = "5.1.0"
+
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -57,9 +63,11 @@ media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "medi
 akdanmaku = { group = "com.kuaishou", name = "akdanmaku", version.ref = "akdanmaku" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 datastore-preferences-rxjava3 = { group = "androidx.datastore", name = "datastore-preferences-rxjava3", version.ref = "datastore" }
-rxjava3 = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava3"}
-rxjava3-android = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxjava3-android"}
-jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup"}
+rxjava3 = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava3" }
+rxjava3-android = { group = "io.reactivex.rxjava3", name = "rxandroid", version.ref = "rxjava3-android" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

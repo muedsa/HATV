@@ -6,8 +6,8 @@ data class VideoInfoModel (
     val id: String,
     val image: String,
     val title: String,
-    val author: String,
-    val desc: String,
+    val author: String? = null,
+    val desc: String? = null,
 ) : KeyModel {
     override val key = id
 }

@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.muedsa.hatv"
-        minSdk = 26
+        minSdk = 29 // TLSv1.3 Supported in 29+
         targetSdk = 34
         versionCode = 1
         versionName = "0.0.1-alpha01"
@@ -44,6 +44,10 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
 }
 
@@ -97,6 +101,9 @@ dependencies {
     implementation(libs.rxjava3.android)
 
     implementation(libs.jsoup)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
 }
 
 kapt {
