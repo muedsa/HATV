@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.muedsa.hatv"
-        minSdk = 29 // TLSv1.3 Supported in 29+
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "0.0.1-alpha01"
