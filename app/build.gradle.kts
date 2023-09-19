@@ -1,8 +1,19 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     kotlin("kapt")
     alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.gmsGoogleService)
+    alias(libs.plugins.firebaseCrashlytics)
+}
+
+val keystorePropertiesFile: File = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists() && keystorePropertiesFile.canRead()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -18,13 +29,40 @@ android {
 
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystoreProperties.containsKey("hatv.signingConfig.storeFile")) {
+                storeFile = file(keystoreProperties["hatv.signingConfig.storeFile"] as String)
+                storePassword = keystoreProperties["hatv.signingConfig.storePassword"] as String
+                keyAlias = keystoreProperties["hatv.signingConfig.keyAlias"] as String
+                keyPassword = keystoreProperties["hatv.signingConfig.keyPassword"] as String
+            } else {
+                val debugSigningConfig = signingConfigs.getByName("debug")
+                storeFile = debugSigningConfig.storeFile
+                storePassword = debugSigningConfig.storePassword
+                keyAlias = debugSigningConfig.keyAlias
+                keyPassword = debugSigningConfig.keyPassword
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -104,6 +142,10 @@ dependencies {
 
     testImplementation(libs.junit4)
     testImplementation(libs.robolectric)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 }
 
 kapt {

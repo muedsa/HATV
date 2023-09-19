@@ -26,7 +26,9 @@ test-core = "1.6.0-alpha01"
 robolectric = "4.10.3"
 mockito = "5.5.0"
 mockito-kotlin = "5.1.0"
-
+google-services = "4.3.15"
+firebase-crashlytics-gradle-plugin = "2.9.9"
+firebase-bom = "32.3.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -68,8 +70,13 @@ rxjava3-android = { group = "io.reactivex.rxjava3", name = "rxandroid", version.
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+gmsGoogleService = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle-plugin" }

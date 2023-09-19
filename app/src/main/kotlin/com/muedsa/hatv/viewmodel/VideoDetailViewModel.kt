@@ -1,10 +1,10 @@
 package com.muedsa.hatv.viewmodel
 
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.repository.IHARepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,6 +35,7 @@ class VideoDetailViewModel @Inject constructor(
                 videoDetail.value = it
             }, {
                 videoDetail.value = null
+                FirebaseCrashlytics.getInstance().recordException(it)
             }, _disposable)
     }
 

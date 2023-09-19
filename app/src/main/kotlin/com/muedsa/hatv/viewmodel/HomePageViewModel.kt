@@ -3,6 +3,7 @@ package com.muedsa.hatv.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.hatv.model.VideosRowModel
 import com.muedsa.hatv.repository.IHARepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ class HomePageViewModel @Inject internal constructor(
                 videosRows.value = it
             }, {
                 videosRows.value = emptyList()
+                FirebaseCrashlytics.getInstance().recordException(it)
             }, _disposable)
     }
 
