@@ -1,6 +1,9 @@
 package com.muedsa.hatv.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalView
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -9,13 +12,19 @@ import androidx.navigation.navArgument
 import com.muedsa.hatv.ui.features.detail.VideoDetailScreen
 import com.muedsa.hatv.ui.features.home.HomeScreen
 import com.muedsa.hatv.ui.features.others.NotFoundScreen
+import com.muedsa.hatv.viewmodel.HomePageViewModel
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = NavigationItems.Home.path) {
 
         composable(NavigationItems.Home.path) {
+            val composeView = LocalView.current
+            val activityViewModel = composeView.findViewTreeViewModelStoreOwner()?.let {
+                hiltViewModel<HomePageViewModel>(it)
+            } ?: hiltViewModel()
             HomeScreen(
+                homePageViewModel = activityViewModel,
                 onNavigate = { navItem, pathParams ->
                     onNavigate(navController, navItem, pathParams)
                 }
