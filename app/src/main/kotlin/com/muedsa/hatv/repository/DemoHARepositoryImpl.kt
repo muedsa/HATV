@@ -18,13 +18,13 @@ class DemoHARepositoryImpl : IHARepository {
             ),
             VideosRowModel(
                 title = "Title Two",
-                videos = getDemoVideos(false),
-                horizontalVideoImage = false
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
             ),
             VideosRowModel(
                 title = "Title Three",
-                videos = getDemoVideos(false),
-                horizontalVideoImage = false
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
             ),
             VideosRowModel(
                 title = "Title Four",
@@ -33,9 +33,24 @@ class DemoHARepositoryImpl : IHARepository {
             ),
             VideosRowModel(
                 title = "Title Five",
+                videos = getDemoVideos(false),
+                horizontalVideoImage = false
+            ),
+            VideosRowModel(
+                title = "Title 6",
                 videos = getDemoVideos(true),
                 horizontalVideoImage = true
-            )
+            ),
+            VideosRowModel(
+                title = "Title 7",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
+            VideosRowModel(
+                title = "Title 8",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
         )).delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
     }
 
@@ -70,100 +85,124 @@ class DemoHARepositoryImpl : IHARepository {
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "【散人】国产悬疑惊悚《三伏》 旧时代三眼神童之谜（已更新至P4 明镜台）",
-                "逍遥散人",
-                "试玩视频BV1qF411x7ER 前作烟火BV15U4y1x7YS\r\n三伏终于上线了，期待很久的国产悬疑游戏，剧情优秀，情节震撼。\r\n喜欢的朋友欢迎收藏三连分享，去steam上购买支持下作者，非常感谢！"
+                if (horizontal)
+                    "逍遥散人"
+                else null,
+                if (horizontal)
+                    "试玩视频BV1qF411x7ER 前作烟火BV15U4y1x7YS\r\n三伏终于上线了，期待很久的国产悬疑游戏，剧情优秀，情节震撼。\r\n喜欢的朋友欢迎收藏三连分享，去steam上购买支持下作者，非常感谢！"
+                else null,
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "汽车安全锤",
-                "鉴货兄弟",
-                "这东西关键时刻真能保命吗？#测评 #汽车安全锤 #有车必备"
+                if (horizontal)
+                    "鉴货兄弟"
+                else null,
+                if (horizontal)
+                    "这东西关键时刻真能保命吗？#测评 #汽车安全锤 #有车必备"
+                else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "【某幻】国产悬疑《三伏》全流程实况 1P三眼神童",
-                "某幻君",
-                "游戏：三伏\n结尾给我刀瞎了"
+                if (horizontal)
+                    "某幻君"
+                else null,
+                if (horizontal) "游戏：三伏\n结尾给我刀瞎了" else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "超燃打戏！功夫皇帝李连杰，22年前豪取15亿票房！",
-                "摩斯神探",
-                "超燃打戏！功夫皇帝李连杰，22年前豪取15亿票房！《龙之吻》"
+                if (horizontal) "摩斯神探" else null,
+                if (horizontal) "超燃打戏！功夫皇帝李连杰，22年前豪取15亿票房！《龙之吻》" else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "《明日方舟》EP - Miss You",
-                "明日方舟",
-                "8月1日 Miss You 正式上架塞壬唱片官网，网易云音乐及QQ音乐等平台\n塞壬唱片官网链接：https://monster-siren.hypergryph.com/music/514540\n\n【专辑介绍】\nMagma is formed from molten rocks.\nThough separated by vast distances, \nthey all converge into a singular life force of molten heat.\nWith the long da"
+                if (horizontal) "明日方舟" else null,
+                if (horizontal)
+                    "8月1日 Miss You 正式上架塞壬唱片官网，网易云音乐及QQ音乐等平台\n塞壬唱片官网链接：https://monster-siren.hypergryph.com/music/514540\n\n【专辑介绍】\nMagma is formed from molten rocks.\nThough separated by vast distances, \nthey all converge into a singular life force of molten heat.\nWith the long da"
+                else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "“他就想活命，他有什么罪!”",
-                "听云up",
-                "电影:我不是药神\nBGM:用什么把你留住"
+                if (horizontal) "听云up" else null,
+                if (horizontal) "电影:我不是药神\nBGM:用什么把你留住" else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "网络热门生物鉴定49",
-                "无穷小亮的科普日常",
-                ""
+                if (horizontal) "无穷小亮的科普日常" else null,
+                if (horizontal) "" else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "【散人】国产悬疑惊悚《三伏》 旧时代三眼神童之谜（已更新至P4 明镜台）",
-                "逍遥散人",
-                "试玩视频BV1qF411x7ER 前作烟火BV15U4y1x7YS\r\n三伏终于上线了，期待很久的国产悬疑游戏，剧情优秀，情节震撼。\r\n喜欢的朋友欢迎收藏三连分享，去steam上购买支持下作者，非常感谢！"
+                if (horizontal)
+                    "逍遥散人"
+                else null,
+                if (horizontal)
+                    "试玩视频BV1qF411x7ER 前作烟火BV15U4y1x7YS\r\n三伏终于上线了，期待很久的国产悬疑游戏，剧情优秀，情节震撼。\r\n喜欢的朋友欢迎收藏三连分享，去steam上购买支持下作者，非常感谢！"
+                else null,
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "汽车安全锤",
-                "鉴货兄弟",
-                "这东西关键时刻真能保命吗？#测评 #汽车安全锤 #有车必备"
+                if (horizontal)
+                    "鉴货兄弟"
+                else null,
+                if (horizontal)
+                    "这东西关键时刻真能保命吗？#测评 #汽车安全锤 #有车必备"
+                else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "【某幻】国产悬疑《三伏》全流程实况 1P三眼神童",
-                "某幻君",
-                "游戏：三伏\n结尾给我刀瞎了"
+                if (horizontal)
+                    "某幻君"
+                else null,
+                if (horizontal) "游戏：三伏\n结尾给我刀瞎了" else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "超燃打戏！功夫皇帝李连杰，22年前豪取15亿票房！",
-                "摩斯神探",
-                "超燃打戏！功夫皇帝李连杰，22年前豪取15亿票房！《龙之吻》"
+                if (horizontal) "摩斯神探" else null,
+                if (horizontal) "超燃打戏！功夫皇帝李连杰，22年前豪取15亿票房！《龙之吻》" else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "《明日方舟》EP - Miss You",
-                "明日方舟",
-                "8月1日 Miss You 正式上架塞壬唱片官网，网易云音乐及QQ音乐等平台\n塞壬唱片官网链接：https://monster-siren.hypergryph.com/music/514540\n\n【专辑介绍】\nMagma is formed from molten rocks.\nThough separated by vast distances, \nthey all converge into a singular life force of molten heat.\nWith the long da"
+                if (horizontal) "明日方舟" else null,
+                if (horizontal)
+                    "8月1日 Miss You 正式上架塞壬唱片官网，网易云音乐及QQ音乐等平台\n塞壬唱片官网链接：https://monster-siren.hypergryph.com/music/514540\n\n【专辑介绍】\nMagma is formed from molten rocks.\nThough separated by vast distances, \nthey all converge into a singular life force of molten heat.\nWith the long da"
+                else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "“他就想活命，他有什么罪!”",
-                "听云up",
-                "电影:我不是药神\nBGM:用什么把你留住"
+                if (horizontal) "听云up" else null,
+                if (horizontal) "电影:我不是药神\nBGM:用什么把你留住" else null
             ),
             VideoInfoModel(
                 rand.nextInt(99999).toString(),
                 "https://picsum.photos/$sizePath?r=${rand.nextInt(99999)}",
                 "网络热门生物鉴定49",
-                "无穷小亮的科普日常",
-                ""
-            ),
+                if (horizontal) "无穷小亮的科普日常" else null,
+                if (horizontal) "" else null
+            )
         ).shuffled()
     }
 

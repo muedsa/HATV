@@ -28,7 +28,15 @@ class HAJsoupUtilTest {
         val body = doc.body()
         val rows = parseHomePageBody(body)
         rows.forEach {
-            println(it)
+            println("row title:${it.title} horizontal:${it.horizontalVideoImage}")
+            assert(it.title.isNotEmpty())
+            it.videos.forEach { video ->
+                println(video)
+                assert(video.id.isNotEmpty())
+                assert(video.image.isNotEmpty())
+                assert(video.title.isNotEmpty())
+            }
+            println("-------")
         }
     }
 
@@ -47,8 +55,15 @@ class HAJsoupUtilTest {
         val body = doc.body()
         val detail = parseWatchPageBody(body)
         println(detail)
+        assert(detail.id.isNotEmpty())
+        assert(detail.image.isNotEmpty())
+        assert(detail.title.isNotEmpty())
+        assert(detail.playUrl.isNotEmpty())
         detail.videoList.forEach {
             println(it)
+            assert(it.id.isNotEmpty())
+            assert(it.image.isNotEmpty())
+            assert(it.title.isNotEmpty())
         }
     }
 }
