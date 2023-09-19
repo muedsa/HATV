@@ -18,11 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.list.TvLazyColumn
+import androidx.tv.foundation.lazy.list.rememberTvLazyListState
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -39,6 +41,7 @@ import com.muedsa.hatv.PlaybackActivity
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.viewmodel.VideoDetailViewModel
 import timber.log.Timber
+import java.lang.Integer.max
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -78,14 +81,20 @@ fun VideoDetailScreen(
                         subtitle = videoDetail.author,
                         description = videoDetail.desc
                     ),
-                    type = ContentBlockType.CAROUSEL
+                    type = ContentBlockType.CAROUSEL,
+                    descriptionMaxLines = 3
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Button(
-                        modifier = Modifier.focusRequester(playButtonFocusRequester),
+                        modifier = Modifier
+                            .focusRequester(playButtonFocusRequester)
+                            .onFocusChanged {
+                                backgroundState.url = videoDetail.image
+                                backgroundState.type = ScreenBackgroundType.SCRIM
+                            },
                         onClick = {
                             val intent = Intent(context, PlaybackActivity::class.java)
                             intent.putExtra(PlaybackActivity.MEDIA_URL_KEY, videoDetail.playUrl)
@@ -110,8 +119,13 @@ fun VideoDetailScreen(
             }
             
             if (videoDetail.videoList.isNotEmpty()) {
+                val selectedIndex =
+                    max(videoDetail.videoList.indexOfFirst { it.id == videoDetail.id }, 0)
                 item {
                     StandardImageCardsRow(
+                        state = rememberTvLazyListState(
+                            initialFirstVisibleItemIndex = selectedIndex
+                        ),
                         title = "视频列表",
                         modelList = videoDetail.videoList,
                         imageFn = VideoInfoModel::image,

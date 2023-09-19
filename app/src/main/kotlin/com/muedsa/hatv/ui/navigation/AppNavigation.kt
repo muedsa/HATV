@@ -1,9 +1,7 @@
 package com.muedsa.hatv.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
