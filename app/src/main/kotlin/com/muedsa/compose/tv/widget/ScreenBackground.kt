@@ -97,7 +97,7 @@ fun ScreenBackground(
                 model = imageRequest,
                 contentDescription = null,
                 modifier = imageModifier,
-                contentScale = ContentScale.FillBounds
+                contentScale = ContentScale.FillWidth
             )
 
             if (delayState.type == ScreenBackgroundType.BLUR) {
