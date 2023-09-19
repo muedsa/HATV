@@ -30,11 +30,14 @@ class HAJsoupUtilTest {
         rows.forEach {
             println("row title:${it.title} horizontal:${it.horizontalVideoImage}")
             assert(it.title.isNotEmpty())
+            val keySet = mutableSetOf<String>()
             it.videos.forEach { video ->
                 println(video)
                 assert(video.id.isNotEmpty())
                 assert(video.image.isNotEmpty())
                 assert(video.title.isNotEmpty())
+                assert(!keySet.contains(video.key))
+                keySet.add(video.key)
             }
             println("-------")
         }
@@ -59,11 +62,14 @@ class HAJsoupUtilTest {
         assert(detail.image.isNotEmpty())
         assert(detail.title.isNotEmpty())
         assert(detail.playUrl.isNotEmpty())
+        val keySet = mutableSetOf<String>()
         detail.videoList.forEach {
             println(it)
             assert(it.id.isNotEmpty())
             assert(it.image.isNotEmpty())
             assert(it.title.isNotEmpty())
+            assert(!keySet.contains(it.key))
+            keySet.add(it.key)
         }
     }
 }

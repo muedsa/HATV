@@ -31,7 +31,7 @@ fun parseHomePageBody(body: Element): List<VideosRowModel> {
 }
 
 private fun parseRow(rowTitle: Element, wrapper: Element): VideosRowModel {
-    val title = rowTitle.text();
+    val title = rowTitle.text()
     val horizontal = wrapper.selectFirst(".home-rows-videos-div") == null
     val videos = if (horizontal)
         parseRowHorizontalItems(wrapper, ".search-doujin-videos")
@@ -50,10 +50,12 @@ private fun parseRowHorizontalItems(
 ): List<VideoInfoModel> {
     val videos = mutableListOf<VideoInfoModel>()
     val elements = wrapper.select(".multiple-link-wrapper$otherCssQuery")
+    val videoIdSet = mutableSetOf<String>()
     for (el in elements) {
         val id = el.selectFirst("a[href^=\"https://hanime1.me/watch?v=\"]")
             ?.attr("href")
             ?.let {
+//                it.removePrefix("https://hanime1.me/watch?v=")
                 UrlQuerySanitizer(it).getValue("v")
             }
         val img = el.select("img").last()?.attr("src")
@@ -62,7 +64,7 @@ private fun parseRowHorizontalItems(
         val desc = el.select(".card-mobile-duration").map {
             it.text()
         }.fastJoinToString(separator = " ")
-        if (id != null && img != null && title != null) {
+        if (id != null && img != null && title != null && !videoIdSet.contains(id)) {
             videos.add(
                 VideoInfoModel(
                     id = id,
@@ -72,6 +74,7 @@ private fun parseRowHorizontalItems(
                     desc = desc
                 )
             )
+            videoIdSet.add(id)
         }
     }
     return videos
@@ -80,14 +83,16 @@ private fun parseRowHorizontalItems(
 private fun parseRowVerticalItems(wrapper: Element): List<VideoInfoModel> {
     val videos = mutableListOf<VideoInfoModel>()
     val elements = wrapper.select(".home-rows-videos-div")
+    val videoIdSet = mutableSetOf<String>()
     for (el in elements) {
         if (el.parent() != null && el.parent()!!.`is`("a[href^=\"https://hanime1.me/watch?v=\"]")) {
             val id = el.parent()!!.attr("href").let {
+//                it.removePrefix("https://hanime1.me/watch?v=")
                 UrlQuerySanitizer(it).getValue("v")
             }
             val img = el.selectFirst("img")?.attr("src")
             val title = el.selectFirst(".home-rows-videos-title")?.text()
-            if (id != null && img != null && title != null) {
+            if (id != null && img != null && title != null && !videoIdSet.contains(id)) {
                 videos.add(
                     VideoInfoModel(
                         id = id,
@@ -95,6 +100,7 @@ private fun parseRowVerticalItems(wrapper: Element): List<VideoInfoModel> {
                         title = title
                     )
                 )
+                videoIdSet.add(id)
             }
         }
     }
