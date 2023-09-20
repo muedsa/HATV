@@ -46,7 +46,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -62,7 +61,6 @@ import com.kuaishou.akdanmaku.render.SimpleRenderer
 import com.kuaishou.akdanmaku.ui.DanmakuPlayer
 import com.kuaishou.akdanmaku.ui.DanmakuView
 import com.muedsa.compose.tv.widget.OutlinedIconBox
-import com.muedsa.hatv.ui.features.others.FillTextScreen
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -88,8 +86,6 @@ fun DanmakuVideoPlayer(
         DanmakuPlayer(SimpleRenderer())
     }
 
-    var errorMsg by remember { mutableStateOf<String?>(null) }
-
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build()
             .also {
@@ -102,10 +98,6 @@ fun DanmakuVideoPlayer(
                         } else {
                             danmakuPlayer.pause()
                         }
-                    }
-
-                    override fun onPlayerErrorChanged(error: PlaybackException?) {
-                        errorMsg = error?.localizedMessage
                     }
                 })
             }
@@ -151,10 +143,6 @@ fun DanmakuVideoPlayer(
     }
 
     PlayerControl(player = exoPlayer, state = playerControlTicker)
-
-    if (!errorMsg.isNullOrEmpty()) {
-        FillTextScreen(errorMsg!!)
-    }
 }
 
 @SuppressLint("OpaqueUnitKey")
@@ -167,17 +155,11 @@ fun SimpleVideoPlayer(
 
     val playerControlTicker = remember { mutableIntStateOf(0) }
 
-    var errorMsg by remember { mutableStateOf<String?>(null) }
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build()
             .also {
                 it.init()
-                it.addListener(object : Player.Listener {
-                    override fun onPlayerErrorChanged(error: PlaybackException?) {
-                        errorMsg = error?.localizedMessage
-                    }
-                })
             }
     }
 
@@ -206,10 +188,6 @@ fun SimpleVideoPlayer(
     }
 
     PlayerControl(player = exoPlayer, state = playerControlTicker)
-
-    if (!errorMsg.isNullOrEmpty()) {
-        FillTextScreen(errorMsg!!)
-    }
 }
 
 @kotlin.OptIn(ExperimentalTvMaterial3Api::class)
