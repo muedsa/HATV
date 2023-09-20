@@ -66,8 +66,10 @@ fun <T> ImageCardsRow(
                     enter = {
                         if (focusRequester.restoreFocusedChild()) {
                             FocusRequester.Cancel
-                        } else {
+                        } else if (modelList.isNotEmpty()) {
                             firstItemFocusRequester
+                        } else {
+                            FocusRequester.Default
                         }
                     }
                 },
@@ -114,6 +116,8 @@ fun <T> StandardImageCardsRow(
 ) {
     val focusRequester = remember { FocusRequester() }
 
+    val firstItemFocusRequester = remember { FocusRequester() }
+
     val rowBottomPadding =
         if (modelList.isNotEmpty() && modelList.stream().anyMatch {
                 contentFn(it) != null
@@ -134,8 +138,15 @@ fun <T> StandardImageCardsRow(
                 .focusRequester(focusRequester)
                 .focusProperties {
                     exit = { focusRequester.saveFocusedChild(); FocusRequester.Default }
-                    enter =
-                        { if (focusRequester.restoreFocusedChild()) FocusRequester.Cancel else FocusRequester.Default }
+                    enter = {
+                        if (focusRequester.restoreFocusedChild()) {
+                            FocusRequester.Cancel
+                        } else if (modelList.isNotEmpty()) {
+                            firstItemFocusRequester
+                        } else {
+                            FocusRequester.Default
+                        }
+                    }
                 },
             state = state,
             contentPadding = PaddingValues(
@@ -146,8 +157,12 @@ fun <T> StandardImageCardsRow(
         ) {
             modelList.forEachIndexed { index, it ->
                 item(key = if (it is KeyModel ) it.key else null) {
+                    var itemModifier = Modifier.padding(end = ImageCardRowCardPadding)
+                    if (index == 0) {
+                        itemModifier = itemModifier.focusRequester(firstItemFocusRequester)
+                    }
                     ImageContentCard(
-                        modifier = Modifier.padding(end = 12.dp),
+                        modifier = itemModifier,
                         url = imageFn(it),
                         imageSize = imageSize,
                         type = CardType.STANDARD,
