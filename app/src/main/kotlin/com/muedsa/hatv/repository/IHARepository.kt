@@ -1,5 +1,6 @@
 package com.muedsa.hatv.repository
 
+import com.muedsa.hatv.model.TagsRowModel
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
@@ -11,5 +12,11 @@ interface IHARepository {
 
     fun fetchVideoDetail(videoId: String): Single<VideoDetailModel>
 
-    fun fetchSearchVideos(): Single<List<VideoInfoModel>>
+    fun fetchSearchTags(): Single<List<TagsRowModel>>
+
+    fun fetchSearchVideos(
+        query: String,
+        type: String = "",
+        tags: List<String> = emptyList()
+    ): Single<List<VideoInfoModel>>
 }

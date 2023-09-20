@@ -1,5 +1,7 @@
 package com.muedsa.hatv.repository
 
+import com.muedsa.hatv.model.TagModel
+import com.muedsa.hatv.model.TagsRowModel
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
@@ -81,7 +83,46 @@ class DemoHARepositoryImpl : IHARepository {
         }.delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
     }
 
-    override fun fetchSearchVideos(): Single<List<VideoInfoModel>> {
+    override fun fetchSearchTags(): Single<List<TagsRowModel>> {
+        return if (RANDOM.nextBoolean()) {
+            Single.just(
+                listOf(
+                    TagsRowModel(
+                        title = "Tag Group One",
+                        tags = getTags("TagOne", 5)
+                    ),
+                    TagsRowModel(
+                        title = "Tag Group Two",
+                        tags = getTags("TagTwo", 10)
+                    ),
+                    TagsRowModel(
+                        title = "Tag Group Three",
+                        tags = getTags("TagThree", 15)
+                    ),
+                    TagsRowModel(
+                        title = "Tag Group Four",
+                        tags = getTags("TagFour", 30)
+                    ),
+                    TagsRowModel(
+                        title = "Tag Group Five",
+                        tags = getTags("TagFive", 20)
+                    ),
+                    TagsRowModel(
+                        title = "Tag Group Six",
+                        tags = getTags("TagSix", 1)
+                    ),
+                )
+            )
+        } else {
+            Single.error(RuntimeException("just mock http request error! ＞﹏＜"))
+        }.delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
+    }
+
+    override fun fetchSearchVideos(
+        query: String,
+        type: String,
+        tags: List<String>
+    ): Single<List<VideoInfoModel>> {
         return Single.just(getDemoVideos()).delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
     }
 
@@ -224,6 +265,14 @@ class DemoHARepositoryImpl : IHARepository {
                 if (horizontal) "中国旅游攻略" else null
             )
         ).shuffled()
+    }
+
+    private fun getTags(label: String, num: Int = 10): List<TagModel> {
+        return buildList(capacity = num) {
+            for (i in 0..num) {
+                add(TagModel("$label-$i"))
+            }
+        }
     }
 
     companion object {

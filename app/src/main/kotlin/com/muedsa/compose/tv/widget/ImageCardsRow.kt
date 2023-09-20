@@ -52,7 +52,7 @@ fun <T> ImageCardsRow(
 
     Column(modifier) {
         Text(
-            modifier = Modifier.padding(start = ImageCardRowCardPadding + 8.dp),
+            modifier = Modifier.padding(start = ImageCardRowCardPadding),
             text = title,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleLarge,

@@ -112,6 +112,7 @@ fun HomeContent(
         )
         1 -> SearchScreen(
             backgroundState = backgroundState,
+            errorMsgBoxState = errorMsgBoxState,
             onNavigate = onNavigate
         )
         else -> NotFoundScreen()

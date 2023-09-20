@@ -1,6 +1,7 @@
 package com.muedsa.hatv.repository
 
 import android.net.Uri
+import com.muedsa.hatv.model.TagsRowModel
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
@@ -27,6 +28,18 @@ class HARepositoryImpl : IHARepository {
         }
     }
 
+    override fun fetchSearchTags(): Single<List<TagsRowModel>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun fetchSearchVideos(
+        query: String,
+        type: String,
+        tags: List<String>
+    ): Single<List<VideoInfoModel>> {
+        TODO("Not yet implemented")
+    }
+
     private fun fetchGet(url: String): Document {
         return Jsoup.connect(url)
             .header(
@@ -36,11 +49,6 @@ class HARepositoryImpl : IHARepository {
             .timeout(TIMEOUT_MS)
             .get()
     }
-
-    override fun fetchSearchVideos(): Single<List<VideoInfoModel>> {
-        TODO("Not yet implemented")
-    }
-
     companion object {
         const val TIMEOUT_MS = 10 * 1000
     }

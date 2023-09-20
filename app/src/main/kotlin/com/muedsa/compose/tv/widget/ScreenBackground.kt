@@ -43,21 +43,17 @@ fun ScreenBackground(
         initType = state.type,
         initHeaders = state.headers
     )
-    LaunchedEffect(key1 = state.url) {
+
+    LaunchedEffect(key1 = state.url, key2 = state.type, key3 = state.headers) {
         delay(300.milliseconds)
         delayState.url = state.url
-    }
-    LaunchedEffect(key1 = state.type) {
-        delay(300.milliseconds)
         delayState.type = state.type
-    }
-    LaunchedEffect(key1 = state.headers) {
-        delay(300.milliseconds)
         delayState.headers.apply {
             clear()
             putAll(state.headers)
         }
     }
+
     if (!delayState.url.isNullOrEmpty()) {
         val context = LocalContext.current
         val configuration = LocalConfiguration.current
