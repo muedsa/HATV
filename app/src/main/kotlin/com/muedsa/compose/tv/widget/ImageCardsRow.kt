@@ -29,6 +29,7 @@ import com.muedsa.compose.tv.theme.HorizontalPosterSize
 import com.muedsa.compose.tv.theme.ImageCardRowCardPadding
 import com.muedsa.compose.tv.theme.TvTheme
 import com.muedsa.compose.tv.theme.VerticalPosterSize
+import timber.log.Timber
 
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -65,10 +66,13 @@ fun <T> ImageCardsRow(
                     exit = { focusRequester.saveFocusedChild(); FocusRequester.Default }
                     enter = {
                         if (focusRequester.restoreFocusedChild()) {
+                            Timber.d("row restoreFocusedChild")
                             FocusRequester.Cancel
-                        } else if (modelList.isNotEmpty()) {
+                        } else if (modelList.isNotEmpty() && state.firstVisibleItemIndex == 0) {
+                            Timber.d("row focused first Child")
                             firstItemFocusRequester
                         } else {
+                            Timber.d("row focused default child")
                             FocusRequester.Default
                         }
                     }
@@ -126,7 +130,7 @@ fun <T> StandardImageCardsRow(
 
     Column(modifier) {
         Text(
-            modifier = Modifier.padding(start = ImageCardRowCardPadding + 8.dp),
+            modifier = Modifier.padding(start = ImageCardRowCardPadding),
             text = title,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleLarge,
@@ -140,10 +144,13 @@ fun <T> StandardImageCardsRow(
                     exit = { focusRequester.saveFocusedChild(); FocusRequester.Default }
                     enter = {
                         if (focusRequester.restoreFocusedChild()) {
+                            Timber.d("row restoreFocusedChild")
                             FocusRequester.Cancel
-                        } else if (modelList.isNotEmpty()) {
+                        } else if (modelList.isNotEmpty() && state.firstVisibleItemIndex == 0) {
+                            Timber.d("row focused first Child")
                             firstItemFocusRequester
                         } else {
+                            Timber.d("row focused default child")
                             FocusRequester.Default
                         }
                     }

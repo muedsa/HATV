@@ -6,12 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import com.muedsa.compose.tv.theme.TvTheme
+import com.muedsa.compose.tv.widget.ErrorMessageBox
+import com.muedsa.compose.tv.widget.ErrorMessageBoxState
+import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.ui.navigation.AppNavigation
 import com.muedsa.hatv.viewmodel.HomePageViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,7 +30,8 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         splashScreen.setKeepOnScreenCondition {
-            viewModel.videosRows.value.isNullOrEmpty()
+            viewModel.videosRowsData.value != null
+                    && viewModel.videosRowsData.value!!.type == LazyType.LOADING
         }
         setContent {
             TvTheme {
@@ -35,7 +40,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(navController = rememberNavController())
+                    val errorMsgBoxState = remember { ErrorMessageBoxState() }
+                    ErrorMessageBox(state = errorMsgBoxState) {
+                        AppNavigation(
+                            navController = rememberNavController(),
+                            errorMsgBoxState = errorMsgBoxState
+                        )
+                    }
                 }
             }
         }

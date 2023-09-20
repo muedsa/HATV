@@ -5,13 +5,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.muedsa.hatv.model.LazyData
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.repository.IHARepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,23 +24,25 @@ class VideoDetailViewModel @Inject constructor(
     private val _disposable = CompositeDisposable()
 
     private val _savedVideoId = savedStateHandle.getStateFlow<String?>(VIDEO_ID_SAVED_STATE_KEY, null)
-    val videoDetail = MutableLiveData<VideoDetailModel?>()
+    val videoDetailData = MutableLiveData<LazyData<VideoDetailModel>>(LazyData.init())
 
-    fun fetchVideoDetail(videoId: String) {
+    fun fetchVideoDetail(videoId: String? = null) {
         clearVideoDetail()
-        repo.fetchVideoDetail(videoId)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                videoDetail.value = it
-            }, {
-                videoDetail.value = null
-                FirebaseCrashlytics.getInstance().recordException(it)
-            }, _disposable)
+        (videoId ?: _savedVideoId.value)?.let {
+            repo.fetchVideoDetail(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    videoDetailData.value = LazyData.success(it)
+                }, {
+                    videoDetailData.value = LazyData.fail(it)
+                    FirebaseCrashlytics.getInstance().recordException(it)
+                }, _disposable)
+        }
     }
 
     private fun clearVideoDetail() {
-        videoDetail.value = null
+        videoDetailData.value = LazyData.init()
     }
 
     init {
@@ -49,10 +51,8 @@ class VideoDetailViewModel @Inject constructor(
                 _disposable.clear()
             }
 
-            _savedVideoId.collectLatest {
-                if(it != null) {
-                    fetchVideoDetail(it)
-                }
+            _savedVideoId.collect {
+                fetchVideoDetail(it)
             }
         }
     }

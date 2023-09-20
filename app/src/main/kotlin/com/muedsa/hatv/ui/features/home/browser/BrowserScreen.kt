@@ -3,7 +3,6 @@ package com.muedsa.hatv.ui.features.home.browser
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -29,12 +28,17 @@ import com.muedsa.compose.tv.theme.ImageCardRowCardPadding
 import com.muedsa.compose.tv.theme.ScreenPaddingLeft
 import com.muedsa.compose.tv.theme.VerticalPosterSize
 import com.muedsa.compose.tv.widget.ContentBlock
+import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.compose.tv.widget.ImageCardsRow
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.compose.tv.widget.StandardImageCardsRow
+import com.muedsa.hatv.model.LazyData
+import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.model.VideoInfoModel
-import com.muedsa.hatv.ui.features.others.FillTextScreen
+import com.muedsa.hatv.ui.features.others.EmptyDataScreen
+import com.muedsa.hatv.ui.features.others.ErrorScreen
+import com.muedsa.hatv.ui.features.others.LoadingScreen
 import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.HomePageViewModel
 import timber.log.Timber
@@ -44,9 +48,10 @@ import timber.log.Timber
 fun BrowserScreen(
     viewModel: HomePageViewModel,
     backgroundState: ScreenBackgroundState,
+    errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> }
 ) {
-    val videosRows by viewModel.videosRows.observeAsState(initial = emptyList())
+    val videosRowsData by viewModel.videosRowsData.observeAsState(initial = LazyData.init())
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
@@ -58,102 +63,116 @@ fun BrowserScreen(
 
     val contentModel = ContentModel(title = title, subtitle = subTitle, description = description)
 
-    if (videosRows.isNotEmpty()) {
-
-        val firstRowHeight =
-            (MaterialTheme.typography.titleLarge.fontSize.value * configuration.fontScale + 0.5f).dp +
-                    ImageCardRowCardPadding * 3 +
-                    if (videosRows[0].horizontalVideoImage) HorizontalPosterSize.height else VerticalPosterSize.height
-        val tabHeight =
-            (MaterialTheme.typography.labelLarge.fontSize.value * configuration.fontScale + 0.5f).dp +
-                    24.dp * 2 +
-                    6.dp * 2
-
-        LaunchedEffect(key1 = Unit) {
-            if (videosRows[0].videos.isNotEmpty()) {
-                val video = videosRows[0].videos[0]
-                title = video.title
-                subTitle = video.author
-                description = video.desc
-                backgroundState.url = video.image
-                backgroundState.type = ScreenBackgroundType.SCRIM
-            }
+    LaunchedEffect(key1 = videosRowsData.type) {
+        if (videosRowsData.type == LazyType.FAILURE) {
+            errorMsgBoxState.error(videosRowsData.error)
         }
+    }
+    if (videosRowsData.type == LazyType.SUCCESS) {
+        if (!videosRowsData.data.isNullOrEmpty()) {
+            val videosRow = videosRowsData.data!!
+            val firstRowHeight =
+                (MaterialTheme.typography.titleLarge.fontSize.value * configuration.fontScale + 0.5f).dp +
+                        ImageCardRowCardPadding * 3 +
+                        if (videosRowsData.data!![0].horizontalVideoImage)
+                            HorizontalPosterSize.height
+                        else VerticalPosterSize.height
+            val tabHeight =
+                (MaterialTheme.typography.labelLarge.fontSize.value * configuration.fontScale + 0.5f).dp +
+                        24.dp * 2 +
+                        6.dp * 2
 
-        TvLazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .offset(x = ScreenPaddingLeft - ImageCardRowCardPadding),
-            contentPadding = PaddingValues(bottom = 100.dp)
-        ) {
-            itemsIndexed(
-                items = videosRows,
-                key = { _, item ->
-                    item.title
+            LaunchedEffect(key1 = videosRowsData) {
+                if (videosRow[0].videos.isNotEmpty()) {
+                    val video = videosRow[0].videos[0]
+                    title = video.title
+                    subTitle = video.author
+                    description = video.desc
+                    backgroundState.url = video.image
+                    backgroundState.type = ScreenBackgroundType.SCRIM
                 }
-            ) { index, item ->
-                if (index == 0) {
-                    ImmersiveList(
-                        background = { _, _ ->
-                            ContentBlock(
-                                modifier = Modifier
-                                    .width(screenWidth / 2)
-                                    .height(screenHeight - firstRowHeight - tabHeight - 20.dp),
-                                model = contentModel,
-                                descriptionMaxLines = 3
-                            )
-                        },
-                    ) {
-                        Column {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(screenHeight - firstRowHeight - tabHeight)
-                            )
-                            ImageCardsRow(
-                                title = item.title,
-                                modelList = item.videos,
-                                imageFn = VideoInfoModel::image,
-                                imageSize = if (item.horizontalVideoImage) HorizontalPosterSize else VerticalPosterSize,
-                                onItemFocus = { _, video ->
-                                    title = video.title
-                                    subTitle = video.author
-                                    description = video.desc
-
-                                    backgroundState.url = video.image
-                                    backgroundState.type = ScreenBackgroundType.SCRIM
-                                },
-                                onItemClick = { _, video ->
-                                    Timber.d("Click $video")
-                                    onNavigate(NavigationItems.Detail, listOf(video.id))
-                                }
-                            )
-                        }
-                    }
-                } else {
-                    StandardImageCardsRow(
-                        title = item.title,
-                        modelList = item.videos,
-                        imageFn = VideoInfoModel::image,
-                        imageSize = if (item.horizontalVideoImage) HorizontalPosterSize else VerticalPosterSize,
-                        contentFn = { ContentModel(it.title, subtitle = it.author) },
-                        onItemFocus = { _, video ->
-                            title = video.title
-                            subTitle = video.author
-                            description = video.desc
-                            backgroundState.url = video.image
-                            backgroundState.type = ScreenBackgroundType.BLUR
-                        },
-                        onItemClick = { _, video ->
-                            Timber.d("Click $video")
-                            onNavigate(NavigationItems.Detail, listOf(video.id))
-                        }
-                    )
-                }
-
             }
+
+            TvLazyColumn(
+                modifier = Modifier
+                    .offset(x = ScreenPaddingLeft - ImageCardRowCardPadding),
+                contentPadding = PaddingValues(bottom = 100.dp)
+            ) {
+                itemsIndexed(
+                    items = videosRow,
+                    key = { _, item ->
+                        item.title
+                    }
+                ) { index, item ->
+                    if (index == 0) {
+                        ImmersiveList(
+                            background = { _, _ ->
+                                ContentBlock(
+                                    modifier = Modifier
+                                        .width(screenWidth / 2)
+                                        .height(screenHeight - firstRowHeight - tabHeight - 20.dp),
+                                    model = contentModel,
+                                    descriptionMaxLines = 3
+                                )
+                            },
+                        ) {
+                            Column {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(screenHeight - firstRowHeight - tabHeight)
+                                )
+                                ImageCardsRow(
+                                    title = item.title,
+                                    modelList = item.videos,
+                                    imageFn = VideoInfoModel::image,
+                                    imageSize = if (item.horizontalVideoImage) HorizontalPosterSize else VerticalPosterSize,
+                                    onItemFocus = { _, video ->
+                                        title = video.title
+                                        subTitle = video.author
+                                        description = video.desc
+
+                                        backgroundState.url = video.image
+                                        backgroundState.type = ScreenBackgroundType.SCRIM
+                                    },
+                                    onItemClick = { _, video ->
+                                        Timber.d("Click $video")
+                                        onNavigate(NavigationItems.Detail, listOf(video.id))
+                                    }
+                                )
+                            }
+                        }
+                    } else {
+                        StandardImageCardsRow(
+                            title = item.title,
+                            modelList = item.videos,
+                            imageFn = VideoInfoModel::image,
+                            imageSize = if (item.horizontalVideoImage) HorizontalPosterSize else VerticalPosterSize,
+                            contentFn = { ContentModel(it.title, subtitle = it.author) },
+                            onItemFocus = { _, video ->
+                                title = video.title
+                                subTitle = video.author
+                                description = video.desc
+                                backgroundState.url = video.image
+                                backgroundState.type = ScreenBackgroundType.BLUR
+                            },
+                            onItemClick = { _, video ->
+                                Timber.d("Click $video")
+                                onNavigate(NavigationItems.Detail, listOf(video.id))
+                            }
+                        )
+                    }
+
+                }
+            }
+        } else {
+            EmptyDataScreen()
+        }
+    } else if (videosRowsData.type == LazyType.FAILURE) {
+        ErrorScreen {
+            viewModel.fetchHomeVideosRows()
         }
     } else {
-        FillTextScreen("Loading...")
+        LoadingScreen()
     }
 }

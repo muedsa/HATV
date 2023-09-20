@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.muedsa.hatv.model.LazyData
 import com.muedsa.hatv.model.VideosRowModel
 import com.muedsa.hatv.repository.IHARepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,16 +20,17 @@ class HomePageViewModel @Inject internal constructor(
 ) : ViewModel() {
 
     private val _disposable = CompositeDisposable()
-    val videosRows = MutableLiveData<List<VideosRowModel>>()
+    val videosRowsData = MutableLiveData<LazyData<List<VideosRowModel>>>(LazyData.init())
 
-    private fun fetchHomeVideosRows() {
+    fun fetchHomeVideosRows() {
+        videosRowsData.value = LazyData.init()
         repo.fetchHomeVideosRows()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                videosRows.value = it
+                videosRowsData.value = LazyData.success(it)
             }, {
-                videosRows.value = emptyList()
+                videosRowsData.value = LazyData.fail(it)
                 FirebaseCrashlytics.getInstance().recordException(it)
             }, _disposable)
     }

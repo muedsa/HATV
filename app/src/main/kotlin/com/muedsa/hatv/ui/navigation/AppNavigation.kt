@@ -8,12 +8,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.hatv.ui.features.detail.VideoDetailScreen
 import com.muedsa.hatv.ui.features.home.HomeScreen
 import com.muedsa.hatv.ui.features.others.NotFoundScreen
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(navController: NavHostController, errorMsgBoxState: ErrorMessageBoxState) {
 
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
@@ -24,6 +25,7 @@ fun AppNavigation(navController: NavHostController) {
         composable(NavigationItems.Home.path) {
             HomeScreen(
                 homePageViewModel = hiltViewModel(viewModelStoreOwner),
+                errorMsgBoxState = errorMsgBoxState,
                 onNavigate = { navItem, pathParams ->
                     onNavigate(navController, navItem, pathParams)
                 }
@@ -36,7 +38,7 @@ fun AppNavigation(navController: NavHostController) {
                 type = NavType.StringType
             })
         ) {
-            VideoDetailScreen()
+            VideoDetailScreen(errorMsgBoxState = errorMsgBoxState)
         }
 
         composable(NavigationItems.NotFound.path) {

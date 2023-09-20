@@ -19,6 +19,7 @@ import androidx.tv.material3.Tab
 import androidx.tv.material3.TabDefaults
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.Text
+import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.hatv.ui.features.home.browser.BrowserScreen
@@ -39,6 +40,7 @@ val tabs = listOf(
 fun HomeNavTab(
     homePageViewModel: HomePageViewModel,
     backgroundState: ScreenBackgroundState = ScreenBackgroundState(),
+    errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> },
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -84,10 +86,11 @@ fun HomeNavTab(
             }
         }
         HomeContent(
-            tabPanelIndex,
-            homePageViewModel,
-            backgroundState,
-            onNavigate
+            tabIndex = tabPanelIndex,
+            homePageViewModel = homePageViewModel,
+            backgroundState = backgroundState,
+            errorMsgBoxState = errorMsgBoxState,
+            onNavigate = onNavigate
         )
     }
 }
@@ -97,12 +100,14 @@ fun HomeContent(
     tabIndex: Int,
     homePageViewModel: HomePageViewModel,
     backgroundState: ScreenBackgroundState,
+    errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> },
 ) {
     when (tabIndex) {
         0 -> BrowserScreen(
             viewModel = homePageViewModel,
             backgroundState = backgroundState,
+            errorMsgBoxState = errorMsgBoxState,
             onNavigate = onNavigate
         )
         1 -> SearchScreen(
