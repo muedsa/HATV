@@ -1,6 +1,7 @@
 package com.muedsa.hatv.ui.features.home.browser
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,7 +83,8 @@ fun BrowserScreen(
         TvLazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .offset(x = ScreenPaddingLeft - ImageCardRowCardPadding)
+                .offset(x = ScreenPaddingLeft - ImageCardRowCardPadding),
+            contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             itemsIndexed(
                 items = videosRows,
