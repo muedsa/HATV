@@ -1,6 +1,7 @@
 package com.muedsa.hatv.test
 
 import android.net.Uri
+import com.muedsa.hatv.model.VideosRowModel
 import com.muedsa.hatv.repository.HAUrls
 import com.muedsa.hatv.util.parseHomePageBody
 import com.muedsa.hatv.util.parseWatchPageBody
@@ -14,6 +15,8 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class HAJsoupUtilTest {
+
+    private val homePageVideosRows: MutableList<VideosRowModel> = mutableListOf()
 
     @Test
     fun parseHomePageBodyTest() {
@@ -41,35 +44,45 @@ class HAJsoupUtilTest {
             }
             println("-------")
         }
+        homePageVideosRows.clear()
+        homePageVideosRows.addAll(rows)
     }
 
     @Test
     fun parseWatchPageBodyTest() {
-        val uriBuilder = Uri.parse(HAUrls.WATCH).buildUpon()
-            .appendQueryParameter("v", "13667")
-        val doc = Jsoup.connect(uriBuilder.build().toString())
-            .header(
-                "User-Agent",
-                "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
-            )
-            .timeout(3 * 1000)
-            .proxy("127.0.0.1", 23334)
-            .get()
-        val body = doc.body()
-        val detail = parseWatchPageBody(body)
-        println(detail)
-        assert(detail.id.isNotEmpty())
-        assert(detail.image.isNotEmpty())
-        assert(detail.title.isNotEmpty())
-        assert(detail.playUrl.isNotEmpty())
-        val keySet = mutableSetOf<String>()
-        detail.videoList.forEach {
-            println(it)
-            assert(it.id.isNotEmpty())
-            assert(it.image.isNotEmpty())
-            assert(it.title.isNotEmpty())
-            assert(!keySet.contains(it.key))
-            keySet.add(it.key)
+        if (homePageVideosRows.isEmpty()) {
+            parseHomePageBodyTest()
+        }
+        for (row in homePageVideosRows) {
+            if (row.videos.isNotEmpty()) {
+                Thread.sleep(1000)
+                val uriBuilder = Uri.parse(HAUrls.WATCH).buildUpon()
+                    .appendQueryParameter("v", row.videos[0].id)
+                val doc = Jsoup.connect(uriBuilder.build().toString())
+                    .header(
+                        "User-Agent",
+                        "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+                    )
+                    .timeout(3 * 1000)
+                    .proxy("127.0.0.1", 23334)
+                    .get()
+                val body = doc.body()
+                val detail = parseWatchPageBody(body)
+                println(detail)
+                assert(detail.id.isNotEmpty())
+                assert(detail.image.isNotEmpty())
+                assert(detail.title.isNotEmpty())
+                assert(detail.playUrl.isNotEmpty())
+                val keySet = mutableSetOf<String>()
+                detail.videoList.forEach {
+                    println(it)
+                    assert(it.id.isNotEmpty())
+                    assert(it.image.isNotEmpty())
+                    assert(it.title.isNotEmpty())
+                    assert(!keySet.contains(it.key))
+                    keySet.add(it.key)
+                }
+            }
         }
     }
 }

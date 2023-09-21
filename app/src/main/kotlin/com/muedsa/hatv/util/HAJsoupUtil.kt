@@ -8,6 +8,8 @@ import com.muedsa.hatv.model.VideosRowModel
 import org.jsoup.nodes.Element
 import org.jsoup.select.Evaluator
 
+val VideoSourceUrlPattern = "const source = 'https://(.*?)';".toRegex()
+
 fun parseHomePageBody(body: Element): List<VideosRowModel> {
     val list = mutableListOf<VideosRowModel>()
     val rowsWrapper = body.selectFirst(Evaluator.Id("home-rows-wrapper"))!!
@@ -111,11 +113,20 @@ fun parseWatchPageBody(body: Element): VideoDetailModel {
     val id = body.selectFirst(Evaluator.Id("video-id"))?.`val`()!!
 
     val videoEl = body.selectFirst(Evaluator.Id("player"))!!
-    val videoSourceEl = videoEl.select("source[src]").maxBy {
-        it.attr("size").toIntOrNull() ?: 0
-    }
     val posterImage = videoEl.attr("poster")
-    val playUrl = videoSourceEl?.attr("src")!!
+    val videoSourceELs = videoEl.select("source[src]")
+    val playUrl = if (videoSourceELs.isNotEmpty()) {
+        val videoSourceEl = videoEl.select("source[src]").maxBy {
+            it.attr("size").toIntOrNull() ?: 0
+        }
+        videoSourceEl?.attr("src")!!
+    } else if (!videoEl.attr("src").isNullOrBlank()) {
+        videoEl.attr("src")
+    } else {
+        VideoSourceUrlPattern.find(videoEl.nextElementSiblings().select("script").html())!!
+            .groups[1]!!
+            .value
+    }
 
     val author = body.selectFirst(Evaluator.Id("video-artist-name"))?.text() ?: ""
 
