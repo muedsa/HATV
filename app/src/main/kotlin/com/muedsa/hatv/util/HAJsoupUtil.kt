@@ -2,6 +2,8 @@ package com.muedsa.hatv.util
 
 import android.net.UrlQuerySanitizer
 import androidx.compose.ui.util.fastJoinToString
+import com.muedsa.hatv.model.TagModel
+import com.muedsa.hatv.model.TagsRowModel
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
@@ -148,4 +150,30 @@ fun parseWatchPageBody(body: Element): VideoDetailModel {
         playUrl = playUrl,
         videoList = videos,
     )
+}
+
+fun parseSearchPageForTags(body: Element): List<TagsRowModel> {
+    val list = mutableListOf<TagsRowModel>()
+    val tagsEl = body.selectFirst("#tags .modal-body")!!
+    tagsEl.children().toList().filter {
+        it.`is`("h5") || it.`is`("label")
+    }.forEach {
+        if (it.`is`("h5")) {
+            list.add(
+                TagsRowModel(
+                    title = it.text(),
+                    tags = mutableListOf()
+                )
+            )
+        } else {
+            (list.last().tags as MutableList<TagModel>)
+                .add(TagModel(it.selectFirst("input[name=\"tags[]\"]")!!.`val`()))
+        }
+    }
+    return list
+}
+
+fun parseSearchPageForVideos(body: Element): List<VideoInfoModel> {
+    val wrapper = body.selectFirst(Evaluator.Id("home-rows-wrapper"))!!
+    return parseRowHorizontalItems(wrapper, ".search-doujin-videos")
 }

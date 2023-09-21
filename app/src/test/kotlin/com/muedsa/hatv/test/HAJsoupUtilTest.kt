@@ -4,6 +4,8 @@ import android.net.Uri
 import com.muedsa.hatv.model.VideosRowModel
 import com.muedsa.hatv.repository.HAUrls
 import com.muedsa.hatv.util.parseHomePageBody
+import com.muedsa.hatv.util.parseSearchPageForTags
+import com.muedsa.hatv.util.parseSearchPageForVideos
 import com.muedsa.hatv.util.parseWatchPageBody
 import org.jsoup.Jsoup
 import org.junit.Test
@@ -83,6 +85,56 @@ class HAJsoupUtilTest {
                     keySet.add(it.key)
                 }
             }
+        }
+    }
+
+    @Test
+    fun parseSearchPageForVideosTest() {
+        val doc = Jsoup.connect(HAUrls.SEARCH)
+            .header(
+                "User-Agent",
+                "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+            )
+            .timeout(3 * 1000)
+            .proxy("127.0.0.1", 23334)
+            .get()
+        val body = doc.body()
+        val tagsRows = parseSearchPageForTags(body)
+        assert(tagsRows.isNotEmpty())
+        tagsRows.forEach {
+            println(it)
+            assert(it.tags.isNotEmpty())
+            it.tags.forEach { tag ->
+                assert(tag.tag.isNotEmpty())
+            }
+            println("-------")
+        }
+    }
+
+    @Test
+    fun parseSearchPageForTagsTest() {
+        val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()
+            .appendQueryParameter("query", "Genshin")
+            .appendQueryParameter("page", "1")
+        val doc = Jsoup.connect(uriBuilder.build().toString())
+            .header(
+                "User-Agent",
+                "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+            )
+            .timeout(3 * 1000)
+            .proxy("127.0.0.1", 23334)
+            .get()
+        val body = doc.body()
+        val videos = parseSearchPageForVideos(body)
+        assert(videos.isNotEmpty())
+        val keySet = mutableSetOf<String>()
+        videos.forEach {
+            println(it)
+            assert(it.id.isNotEmpty())
+            assert(it.image.isNotEmpty())
+            assert(it.title.isNotEmpty())
+            assert(!keySet.contains(it.key))
+            keySet.add(it.key)
         }
     }
 }

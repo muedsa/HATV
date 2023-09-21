@@ -6,6 +6,8 @@ import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
 import com.muedsa.hatv.util.parseHomePageBody
+import com.muedsa.hatv.util.parseSearchPageForTags
+import com.muedsa.hatv.util.parseSearchPageForVideos
 import com.muedsa.hatv.util.parseWatchPageBody
 import io.reactivex.rxjava3.core.Single
 import org.jsoup.Jsoup
@@ -22,6 +24,7 @@ class HARepositoryImpl : IHARepository {
     override fun fetchVideoDetail(videoId: String): Single<VideoDetailModel> {
         return Single.create {
             val uriBuilder = Uri.parse(HAUrls.WATCH).buildUpon()
+                .clearQuery()
                 .appendQueryParameter("v", videoId)
             val body = fetchGet(uriBuilder.build().toString()).body()
             it.onSuccess(parseWatchPageBody(body))
@@ -29,7 +32,10 @@ class HARepositoryImpl : IHARepository {
     }
 
     override fun fetchSearchTags(): Single<List<TagsRowModel>> {
-        TODO("Not yet implemented")
+        return Single.create {
+            val body = fetchGet(HAUrls.SEARCH).body()
+            it.onSuccess(parseSearchPageForTags(body))
+        }
     }
 
     override fun fetchSearchVideos(
@@ -37,7 +43,17 @@ class HARepositoryImpl : IHARepository {
         type: String,
         tags: List<String>
     ): Single<List<VideoInfoModel>> {
-        TODO("Not yet implemented")
+        return Single.create {
+            val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()
+                .clearQuery()
+                .appendQueryParameter("query", query)
+                .appendQueryParameter("type", type)
+            tags.forEach { tag ->
+                uriBuilder.appendQueryParameter("tags[]", tag)
+            }
+            val body = fetchGet(uriBuilder.build().toString()).body()
+            it.onSuccess(parseSearchPageForVideos(body))
+        }
     }
 
     private fun fetchGet(url: String): Document {
