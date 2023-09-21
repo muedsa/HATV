@@ -1,6 +1,7 @@
 package com.muedsa.compose.tv.widget.player
 
 import android.annotation.SuppressLint
+import android.view.Gravity
 import android.view.KeyEvent
 import android.widget.FrameLayout
 import androidx.activity.compose.BackHandler
@@ -87,7 +88,8 @@ fun DanmakuVideoPlayer(
     }
 
     val exoPlayer = remember {
-        ExoPlayer.Builder(context).build()
+        ExoPlayer.Builder(context)
+            .build()
             .also {
                 it.videoPlayerInit()
                 it.addListener(object : Player.Listener {
@@ -113,12 +115,12 @@ fun DanmakuVideoPlayer(
                 PlayerView(context).apply {
                     hideController()
                     useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     player = exoPlayer
                     layoutParams = FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        Gravity.CENTER
                     )
                 }
             })
@@ -172,12 +174,12 @@ fun SimpleVideoPlayer(
             PlayerView(context).apply {
                 hideController()
                 useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 player = exoPlayer
                 layoutParams = FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    Gravity.CENTER
                 )
             }
         })

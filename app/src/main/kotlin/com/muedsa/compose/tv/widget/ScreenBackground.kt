@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
@@ -59,9 +60,19 @@ fun ScreenBackground(
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp
         val screenHeight = configuration.screenHeightDp.dp
-        val immersiveImageHeight = screenHeight * 8 / 10
-        val immersiveImageWidth = immersiveImageHeight * 16 / 9
-        val immersiveImageOffsetX = screenWidth - immersiveImageWidth
+
+        val immersiveImageWidth: Dp
+        val immersiveImageHeight: Dp
+        val immersiveImageOffsetX: Dp
+        if (screenWidth > screenHeight) {
+            immersiveImageHeight = screenHeight * 8 / 10
+            immersiveImageWidth = immersiveImageHeight * 16 / 9
+            immersiveImageOffsetX = screenWidth - immersiveImageWidth
+        } else {
+            immersiveImageWidth = screenWidth
+            immersiveImageHeight = screenHeight
+            immersiveImageOffsetX = 0.dp
+        }
         val imageModifier = if (delayState.type == ScreenBackgroundType.SCRIM) {
             Modifier
                 .size(immersiveImageWidth, immersiveImageHeight)
