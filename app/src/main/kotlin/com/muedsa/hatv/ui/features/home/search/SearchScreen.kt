@@ -2,12 +2,12 @@ package com.muedsa.hatv.ui.features.home.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -33,6 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.tv.foundation.lazy.grid.TvGridCells
+import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
+import androidx.tv.foundation.lazy.grid.items
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.ButtonDefaults
@@ -44,10 +47,16 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.OutlinedIconButton
 import androidx.tv.material3.Text
+import com.muedsa.compose.tv.model.ContentModel
 import com.muedsa.compose.tv.theme.CustomerColor
+import com.muedsa.compose.tv.theme.HorizontalPosterSize
+import com.muedsa.compose.tv.theme.ImageCardRowCardPadding
 import com.muedsa.compose.tv.theme.ScreenPaddingLeft
+import com.muedsa.compose.tv.widget.CardType
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
+import com.muedsa.compose.tv.widget.ImageContentCard
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
+import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.hatv.model.LazyData
 import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.ui.features.others.ErrorScreen
@@ -68,25 +77,34 @@ fun SearchScreen(
     val tagsRowsData by viewModel.tagsRowsData.observeAsState(initial = LazyData.init())
 
     var searchText by viewModel.searchText
+    val selectedTags = viewModel.selectedTags
+
+    val searchVideosData by viewModel.searchVideosData.observeAsState(initial = LazyData.init())
 
     var tagsExpand by remember {
         mutableStateOf(false)
     }
 
-    LaunchedEffect(key1 = tagsRowsData.type) {
+    LaunchedEffect(key1 = tagsRowsData.type, key2 = tagsRowsData.error) {
         if (tagsRowsData.type == LazyType.FAILURE) {
             errorMsgBoxState.error(tagsRowsData.error)
         }
     }
 
-    if (tagsRowsData.type == LazyType.SUCCESS) {
-        TvLazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = ScreenPaddingLeft, end = 24.dp),
-            contentPadding = PaddingValues(top = 12.dp, bottom = 100.dp)
-        ) {
-            item {
+    LaunchedEffect(key1 = searchVideosData.type, key2 = searchVideosData.error) {
+        if (searchVideosData.type == LazyType.FAILURE) {
+            errorMsgBoxState.error(searchVideosData.error)
+        }
+    }
+
+    when (tagsRowsData.type) {
+        LazyType.LOADING -> {
+            LoadingScreen()
+        }
+
+        LazyType.SUCCESS -> {
+
+            Column(modifier = Modifier.padding(start = ScreenPaddingLeft)) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -117,7 +135,8 @@ fun SearchScreen(
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     OutlinedIconButton(onClick = {
-
+                        tagsExpand = false
+                        viewModel.fetchSearchVideos()
                     }) {
                         Icon(
                             modifier = Modifier.size(ButtonDefaults.IconSize),
@@ -139,48 +158,83 @@ fun SearchScreen(
                     }
                 }
 
-            }
-
-            if (!tagsRowsData.data.isNullOrEmpty() && tagsExpand) {
-                items(tagsRowsData.data!!) {
-                    Text(
-                        text = it.title,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    FlowRow {
-                        for (tag in it.tags) {
-                            FilterChip(
-                                modifier = Modifier.padding(8.dp),
-                                selected = tag.selected.value,
-                                leadingIcon = if (tag.selected.value) {
-                                    {
-                                        Icon(
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize),
-                                            imageVector = Icons.Outlined.Check,
-                                            contentDescription = "选择${tag.tag}"
-                                        )
+                if (tagsExpand && !tagsRowsData.data.isNullOrEmpty()) {
+                    TvLazyColumn(contentPadding = PaddingValues(top = ImageCardRowCardPadding)) {
+                        items(tagsRowsData.data!!) {
+                            Text(
+                                text = it.title,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            FlowRow {
+                                for (tag in it.tags) {
+                                    FilterChip(
+                                        modifier = Modifier.padding(8.dp),
+                                        selected = tag.selected.value,
+                                        leadingIcon = if (tag.selected.value) {
+                                            {
+                                                Icon(
+                                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                    imageVector = Icons.Outlined.Check,
+                                                    contentDescription = "选择${tag.tag}"
+                                                )
+                                            }
+                                        } else null,
+                                        onClick = {
+                                            Timber.d("click $tag")
+                                            if (tag.selected.value) {
+                                                selectedTags.remove(tag.tag)
+                                                tag.selected.value = false
+                                            } else {
+                                                selectedTags.add(tag.tag)
+                                                tag.selected.value = true
+                                            }
+                                        }
+                                    ) {
+                                        Text(text = tag.tag)
                                     }
-                                } else null,
-                                onClick = {
-                                    Timber.d("click $tag")
-                                    tag.selected.value = !tag.selected.value
                                 }
-                            ) {
-                                Text(text = tag.tag)
                             }
+                            Divider(modifier = Modifier.padding(bottom = 10.dp))
                         }
                     }
-                    Divider(modifier = Modifier.padding(bottom = 10.dp))
+                }
+
+                if (!tagsExpand && searchVideosData.type == LazyType.SUCCESS && !searchVideosData.data.isNullOrEmpty()) {
+                    TvLazyVerticalGrid(
+                        columns = TvGridCells.Adaptive(HorizontalPosterSize.width + ImageCardRowCardPadding),
+                        contentPadding = PaddingValues(top = ImageCardRowCardPadding)
+                    ) {
+                        items(
+                            items = searchVideosData.data!!,
+                            key = { it.id }
+                        ) {
+                            ImageContentCard(
+                                modifier = Modifier.padding(end = ImageCardRowCardPadding),
+                                url = it.image,
+                                imageSize = HorizontalPosterSize,
+                                type = CardType.STANDARD,
+                                model = ContentModel(it.title, subtitle = it.author),
+                                onItemFocus = {
+                                    backgroundState.url = it.image
+                                    backgroundState.type = ScreenBackgroundType.BLUR
+                                },
+                                onItemClick = {
+                                    Timber.d("Click $it")
+                                    onNavigate(NavigationItems.Detail, listOf(it.id))
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
-    } else if (tagsRowsData.type == LazyType.FAILURE) {
-        ErrorScreen(onRefresh = {
-            viewModel.initTags()
-        })
-    } else {
-        LoadingScreen()
+
+        LazyType.FAILURE -> {
+            ErrorScreen(onRefresh = {
+                viewModel.initTags()
+            })
+        }
     }
 }

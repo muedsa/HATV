@@ -68,7 +68,7 @@ fun VideoDetailScreen(
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
 
-    LaunchedEffect(key1 = videoDetailData.type) {
+    LaunchedEffect(key1 = videoDetailData.type, key2 = videoDetailData.error) {
         if (videoDetailData.type == LazyType.FAILURE) {
             errorMsgBoxState.error(videoDetailData.error)
         }

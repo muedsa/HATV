@@ -24,12 +24,20 @@ class SearchViewModel @Inject constructor(
     val tagsRowsData = MutableLiveData<LazyData<List<TagsRowModel>>>(LazyData.init())
 
     val searchText = mutableStateOf("")
-    val tags = mutableListOf<String>()
+    val selectedTags = mutableSetOf<String>()
 
     val searchVideosData = MutableLiveData<LazyData<List<VideoInfoModel>>>(LazyData.init())
 
     fun fetchSearchVideos() {
-        repo.fetchSearchVideos(query = searchText.value, tags = tags)
+        repo.fetchSearchVideos(query = searchText.value, tags = selectedTags.toList())
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                searchVideosData.value = LazyData.success(it)
+            }, {
+                searchVideosData.value = LazyData.fail(it)
+                FirebaseCrashlytics.getInstance().recordException(it)
+            }, _disposable)
     }
 
     fun initTags() {

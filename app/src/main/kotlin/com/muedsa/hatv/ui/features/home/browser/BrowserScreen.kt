@@ -63,7 +63,7 @@ fun BrowserScreen(
 
     val contentModel = ContentModel(title = title, subtitle = subTitle, description = description)
 
-    LaunchedEffect(key1 = videosRowsData.type) {
+    LaunchedEffect(key1 = videosRowsData.type, key2 = videosRowsData.error) {
         if (videosRowsData.type == LazyType.FAILURE) {
             errorMsgBoxState.error(videosRowsData.error)
         }

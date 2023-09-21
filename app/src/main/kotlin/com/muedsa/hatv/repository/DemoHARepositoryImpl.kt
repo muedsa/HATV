@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 class DemoHARepositoryImpl : IHARepository {
 
     override fun fetchHomeVideosRows(): Single<List<VideosRowModel>> {
-        return if (RANDOM.nextBoolean()) {
+        return if (RANDOM.nextInt(10) < 8) {
             Single.just(
                 listOf(
                     VideosRowModel(
@@ -63,7 +63,7 @@ class DemoHARepositoryImpl : IHARepository {
     }
 
     override fun fetchVideoDetail(videoId: String): Single<VideoDetailModel> {
-        return if (RANDOM.nextBoolean()) {
+        return if (RANDOM.nextInt(10) < 8) {
             val videos = getDemoVideos()
             val index = RANDOM.nextInt(videos.size - 1)
             val video = videos[index]
@@ -84,7 +84,7 @@ class DemoHARepositoryImpl : IHARepository {
     }
 
     override fun fetchSearchTags(): Single<List<TagsRowModel>> {
-        return if (RANDOM.nextBoolean()) {
+        return if (RANDOM.nextInt(10) < 8) {
             Single.just(
                 listOf(
                     TagsRowModel(
