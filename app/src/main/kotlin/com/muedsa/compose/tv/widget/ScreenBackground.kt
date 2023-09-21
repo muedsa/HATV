@@ -60,17 +60,18 @@ fun ScreenBackground(
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp
         val screenHeight = configuration.screenHeightDp.dp
+        val horizontal = screenWidth > screenHeight
 
         val immersiveImageWidth: Dp
         val immersiveImageHeight: Dp
         val immersiveImageOffsetX: Dp
-        if (screenWidth > screenHeight) {
+        if (horizontal) {
             immersiveImageHeight = screenHeight * 8 / 10
             immersiveImageWidth = immersiveImageHeight * 16 / 9
             immersiveImageOffsetX = screenWidth - immersiveImageWidth
         } else {
             immersiveImageWidth = screenWidth
-            immersiveImageHeight = screenHeight
+            immersiveImageHeight = screenHeight * 8 / 10
             immersiveImageOffsetX = 0.dp
         }
         val imageModifier = if (delayState.type == ScreenBackgroundType.SCRIM) {
@@ -104,7 +105,7 @@ fun ScreenBackground(
                 model = imageRequest,
                 contentDescription = null,
                 modifier = imageModifier,
-                contentScale = ContentScale.FillWidth
+                contentScale = if (horizontal) ContentScale.FillWidth else ContentScale.Crop
             )
 
             if (delayState.type == ScreenBackgroundType.BLUR) {
