@@ -1,6 +1,5 @@
 package com.muedsa.hatv
 
-import EnvConfig
 import com.muedsa.hatv.repository.DemoHARepositoryImpl
 import com.muedsa.hatv.repository.HARepositoryImpl
 import dagger.Module
@@ -14,5 +13,6 @@ import javax.inject.Singleton
 internal object AppModule {
     @Provides
     @Singleton
-    fun provideHARepository() = if (EnvConfig.DEBUG) DemoHARepositoryImpl() else HARepositoryImpl()
+    fun provideHARepository() =
+        if (BuildConfig.FLAVOR == Flavors.DEMO) DemoHARepositoryImpl() else HARepositoryImpl()
 }

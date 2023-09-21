@@ -1,6 +1,5 @@
 package com.muedsa.compose.tv.widget.player
 
-import EnvConfig
 import android.annotation.SuppressLint
 import android.view.KeyEvent
 import android.widget.FrameLayout
@@ -61,6 +60,7 @@ import com.kuaishou.akdanmaku.render.SimpleRenderer
 import com.kuaishou.akdanmaku.ui.DanmakuPlayer
 import com.kuaishou.akdanmaku.ui.DanmakuView
 import com.muedsa.compose.tv.widget.OutlinedIconBox
+import com.muedsa.hatv.BuildConfig
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -297,7 +297,7 @@ fun PlayerControl(
                     }
                 }
 
-                if (EnvConfig.DEBUG) {
+                if (BuildConfig.DEBUG) {
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(text = "show: $state", color = Color.Red)
                 }

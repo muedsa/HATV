@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "901806447001",
+    "project_id": "hatv-8549c",
+    "storage_bucket": "hatv-8549c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901806447001:android:cde372272b3a7505999b08",
+        "android_client_info": {
+          "package_name": "com.muedsa.hatv"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVvMVLEaSHPbc2QTEIgQxf6FoQIRamTnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901806447001:android:74a07948312501f3999b08",
+        "android_client_info": {
+          "package_name": "com.muedsa.hatv.demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVvMVLEaSHPbc2QTEIgQxf6FoQIRamTnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901806447001:android:7fc4c07b39c9c6c2999b08",
+        "android_client_info": {
+          "package_name": "com.muedsa.hatv.demo.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVvMVLEaSHPbc2QTEIgQxf6FoQIRamTnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
