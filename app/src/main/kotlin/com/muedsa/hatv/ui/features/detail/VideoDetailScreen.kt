@@ -168,7 +168,7 @@ fun VideoDetailScreen(
                             },
                             onItemClick = { _, video ->
                                 Timber.d("Click $video")
-                                viewModel.fetchVideoDetail(video.id)
+                                viewModel.videoIdLD.value = video.id
                             }
                         )
                     }
@@ -180,7 +180,7 @@ fun VideoDetailScreen(
         }
     } else if (videoDetailData.type == LazyType.FAILURE) {
         ErrorScreen {
-            viewModel.fetchVideoDetail()
+            viewModel.videoIdLD.value = viewModel.videoIdLD.value
         }
     } else {
         LoadingScreen()
