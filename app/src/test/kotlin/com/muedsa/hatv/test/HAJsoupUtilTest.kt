@@ -4,8 +4,8 @@ import android.net.Uri
 import com.muedsa.hatv.model.VideosRowModel
 import com.muedsa.hatv.repository.HAUrls
 import com.muedsa.hatv.util.parseHomePageBody
-import com.muedsa.hatv.util.parseSearchPageForTags
-import com.muedsa.hatv.util.parseSearchPageForVideos
+import com.muedsa.hatv.util.parsePagedVideosFromSearchPage
+import com.muedsa.hatv.util.parseSearchOptionsFromSearchPage
 import com.muedsa.hatv.util.parseWatchPageBody
 import org.jsoup.Jsoup
 import org.junit.Test
@@ -89,7 +89,7 @@ class HAJsoupUtilTest {
     }
 
     @Test
-    fun parseSearchPageForVideosTest() {
+    fun parseSearchOptionsFromSearchPageTest() {
         val doc = Jsoup.connect(HAUrls.SEARCH)
             .header(
                 "User-Agent",
@@ -99,9 +99,11 @@ class HAJsoupUtilTest {
             .proxy("127.0.0.1", 23334)
             .get()
         val body = doc.body()
-        val tagsRows = parseSearchPageForTags(body)
-        assert(tagsRows.isNotEmpty())
-        tagsRows.forEach {
+        val searchOptions = parseSearchOptionsFromSearchPage(body)
+        assert(searchOptions.genres.isNotEmpty())
+        assert(searchOptions.tagsRows.isNotEmpty())
+        println("Genres: ${searchOptions.genres}")
+        searchOptions.tagsRows.forEach {
             println(it)
             assert(it.tags.isNotEmpty())
             it.tags.forEach { tag ->
@@ -112,9 +114,9 @@ class HAJsoupUtilTest {
     }
 
     @Test
-    fun parseSearchPageForTagsTest() {
+    fun parsePagedVideosFromSearchPageTest() {
         val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()
-            .appendQueryParameter("query", "Genshin")
+            .appendQueryParameter("query", "")
             .appendQueryParameter("page", "1")
         val doc = Jsoup.connect(uriBuilder.build().toString())
             .header(
@@ -125,10 +127,11 @@ class HAJsoupUtilTest {
             .proxy("127.0.0.1", 23334)
             .get()
         val body = doc.body()
-        val videos = parseSearchPageForVideos(body)
-        assert(videos.isNotEmpty())
+        val pagedVideos = parsePagedVideosFromSearchPage(body)
+        println("page: ${pagedVideos.videos}, maxPage: ${pagedVideos.maxPage}")
+        assert(pagedVideos.videos.isNotEmpty())
         val keySet = mutableSetOf<String>()
-        videos.forEach {
+        pagedVideos.videos.forEach {
             println(it)
             assert(it.id.isNotEmpty())
             assert(it.image.isNotEmpty())

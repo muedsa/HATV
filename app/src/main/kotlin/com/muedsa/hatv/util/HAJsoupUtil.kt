@@ -2,8 +2,11 @@ package com.muedsa.hatv.util
 
 import android.net.UrlQuerySanitizer
 import androidx.compose.ui.util.fastJoinToString
-import com.muedsa.hatv.model.TagModel
-import com.muedsa.hatv.model.TagsRowModel
+import androidx.core.text.isDigitsOnly
+import com.muedsa.hatv.model.PagedVideoInfoModel
+import com.muedsa.hatv.model.SearchOptionsModel
+import com.muedsa.hatv.model.SearchTagModel
+import com.muedsa.hatv.model.SearchTagsRowModel
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
@@ -152,28 +155,71 @@ fun parseWatchPageBody(body: Element): VideoDetailModel {
     )
 }
 
-fun parseSearchPageForTags(body: Element): List<TagsRowModel> {
-    val list = mutableListOf<TagsRowModel>()
+fun parseSearchOptionsFromSearchPage(body: Element): SearchOptionsModel {
+    val genres = parseGenresFromSearchPage(body)
+    val tagsRows = parseTagsFromSearchPage(body)
+    return SearchOptionsModel(
+        genres = genres,
+        tagsRows = tagsRows
+    )
+}
+
+fun parseGenresFromSearchPage(body: Element): List<String> {
+    val genresEl = body.selectFirst("#genre-modal .modal-body")!!
+    return genresEl.select(".hentai-sort-options").map {
+        it.text()
+    }
+}
+
+fun parseTagsFromSearchPage(body: Element): List<SearchTagsRowModel> {
+    val list = mutableListOf<SearchTagsRowModel>()
     val tagsEl = body.selectFirst("#tags .modal-body")!!
     tagsEl.children().toList().filter {
         it.`is`("h5") || it.`is`("label")
     }.forEach {
         if (it.`is`("h5")) {
             list.add(
-                TagsRowModel(
+                SearchTagsRowModel(
                     title = it.text(),
                     tags = mutableListOf()
                 )
             )
         } else {
-            (list.last().tags as MutableList<TagModel>)
-                .add(TagModel(it.selectFirst("input[name=\"tags[]\"]")!!.`val`()))
+            (list.last().tags as MutableList<SearchTagModel>)
+                .add(SearchTagModel(it.selectFirst("input[name=\"tags[]\"]")!!.`val`()))
         }
     }
     return list
 }
 
-fun parseSearchPageForVideos(body: Element): List<VideoInfoModel> {
+fun parsePagedVideosFromSearchPage(body: Element): PagedVideoInfoModel {
     val wrapper = body.selectFirst(Evaluator.Id("home-rows-wrapper"))!!
-    return parseRowHorizontalItems(wrapper, ".search-doujin-videos")
+    val videos = parseRowHorizontalItems(wrapper, ".search-doujin-videos")
+    val paginationEl = body.selectFirst("ul.pagination[role=\"navigation\"]")
+    var page = 1
+    var maxPage = 1
+    paginationEl?.let {
+        it.selectFirst("li.page-item.active")?.let { activeEl ->
+            activeEl.text().let { text ->
+                if (text.isDigitsOnly()) {
+                    page = text.toInt()
+                    maxPage = page
+                }
+            }
+        }
+        it.select("a.page-link").toList()
+            .map { i -> i.text() }
+            .filter { i -> i.isDigitsOnly() }
+            .map { i -> i.toInt() }
+            .let { pageNoList ->
+                if (pageNoList.isNotEmpty()) {
+                    maxPage = pageNoList.max()
+                }
+            }
+    }
+    return PagedVideoInfoModel(
+        page = page,
+        maxPage = maxPage,
+        videos = videos
+    )
 }

@@ -1,11 +1,10 @@
 package com.muedsa.hatv.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.hatv.model.LazyData
-import com.muedsa.hatv.model.TagsRowModel
+import com.muedsa.hatv.model.SearchOptionsModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.repository.IHARepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,34 +20,65 @@ class SearchViewModel @Inject constructor(
 
     private val _disposable = CompositeDisposable()
 
-    val tagsRowsData = MutableLiveData<LazyData<List<TagsRowModel>>>(LazyData.init())
+    val searchOptionsLD = MutableLiveData<LazyData<SearchOptionsModel>>(LazyData.init())
 
-    val searchText = mutableStateOf("")
-    val selectedTags = mutableSetOf<String>()
+    val searchTextLD = MutableLiveData("")
+    val searchGenreLD = MutableLiveData("")
+    val selectedTagsLD = MutableLiveData<MutableSet<String>>(mutableSetOf())
 
-    val searchVideosData = MutableLiveData<LazyData<List<VideoInfoModel>>>(LazyData.init())
+    val searchVideosLD = MutableLiveData<MutableList<VideoInfoModel>>(mutableListOf())
+    val pageLD = MutableLiveData(1)
+    val maxPageLD = MutableLiveData(1)
+    val searchLoadLD = MutableLiveData<LazyData<Unit>>()
 
     fun fetchSearchVideos() {
-        repo.fetchSearchVideos(query = searchText.value, tags = selectedTags.toList())
-            .subscribeOn(Schedulers.io())
+        searchLoadLD.value = LazyData.init()
+        repo.fetchSearchVideos(
+            query = searchTextLD.value ?: "",
+            genre = searchGenreLD.value ?: "",
+            tags = selectedTagsLD.value?.toList() ?: emptyList(),
+            page = 1
+        ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                searchVideosData.value = LazyData.success(it)
+                searchVideosLD.value = it.videos.toMutableList()
+                pageLD.value = it.page
+                maxPageLD.value = it.maxPage
+                searchLoadLD.value = LazyData.success(Unit)
             }, {
-                searchVideosData.value = LazyData.fail(it)
+                searchVideosLD.value = mutableListOf()
                 FirebaseCrashlytics.getInstance().recordException(it)
             }, _disposable)
     }
 
-    fun initTags() {
-        tagsRowsData.value = LazyData.init()
-        repo.fetchSearchTags()
+    fun fetchSearchVideosNextPage() {
+        searchLoadLD.value = LazyData.init()
+        repo.fetchSearchVideos(
+            query = searchTextLD.value ?: "",
+            genre = searchGenreLD.value ?: "",
+            tags = selectedTagsLD.value?.toList() ?: emptyList(),
+            page = pageLD.value!! + 1
+        ).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                searchVideosLD.value!!.addAll(it.videos)
+                pageLD.value = it.page
+                maxPageLD.value = it.maxPage
+                searchLoadLD.value = LazyData.success(Unit)
+            }, {
+                FirebaseCrashlytics.getInstance().recordException(it)
+            }, _disposable)
+    }
+
+    fun initSearchOptions() {
+        searchOptionsLD.value = LazyData.init()
+        repo.fetchSearchOptions()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                tagsRowsData.value = LazyData.success(it)
+                searchOptionsLD.value = LazyData.success(it)
             }, {
-                tagsRowsData.value = LazyData.fail(it)
+                searchOptionsLD.value = LazyData.fail(it)
                 FirebaseCrashlytics.getInstance().recordException(it)
             }, _disposable)
     }
@@ -57,6 +87,6 @@ class SearchViewModel @Inject constructor(
         addCloseable {
             _disposable.clear()
         }
-        initTags()
+        initSearchOptions()
     }
 }

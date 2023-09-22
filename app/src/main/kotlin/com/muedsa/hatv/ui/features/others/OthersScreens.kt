@@ -1,5 +1,6 @@
 package com.muedsa.hatv.ui.features.others
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,27 +16,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.OutlinedIconButton
 import androidx.tv.material3.Text
 
 @Composable
-fun NotFoundScreen() {
-    FillTextScreen("404 Not Found (っ °Д °;)っ")
+fun NotFoundScreen(model: Boolean = false) {
+    FillTextScreen(context = "404 Not Found (っ °Д °;)っ", model = model)
 }
 
 @Composable
-fun NotImplementScreen() {
-    FillTextScreen("Not Implement (っ °Д °;)っ")
+fun NotImplementScreen(model: Boolean = false) {
+    FillTextScreen(context = "Not Implement (っ °Д °;)っ", model = model)
 }
 
 @Composable
-fun LoadingScreen() {
-    FillTextScreen("Loading... {{{(>_<)}}}")
+fun LoadingScreen(model: Boolean = false) {
+    FillTextScreen(context = "Loading... {{{(>_<)}}}", model = model)
 }
 
 @Composable
-fun EmptyDataScreen() {
-    FillTextScreen("Empty(っ °Д °;)っ")
+fun EmptyDataScreen(model: Boolean = false) {
+    FillTextScreen(context = "Empty(っ °Д °;)っ", model = model)
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -60,10 +62,13 @@ fun ErrorScreen(onRefresh: (() -> Unit)? = null) {
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun FillTextScreen(context: String) {
+fun FillTextScreen(context: String, model: Boolean = false) {
+    var modifier = Modifier.fillMaxSize()
+    if (model) {
+        modifier = modifier.background(MaterialTheme.colorScheme.surface)
+    }
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .padding(20.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

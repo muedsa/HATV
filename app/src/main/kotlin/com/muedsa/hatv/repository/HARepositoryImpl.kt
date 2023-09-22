@@ -1,13 +1,13 @@
 package com.muedsa.hatv.repository
 
 import android.net.Uri
-import com.muedsa.hatv.model.TagsRowModel
+import com.muedsa.hatv.model.PagedVideoInfoModel
+import com.muedsa.hatv.model.SearchOptionsModel
 import com.muedsa.hatv.model.VideoDetailModel
-import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
 import com.muedsa.hatv.util.parseHomePageBody
-import com.muedsa.hatv.util.parseSearchPageForTags
-import com.muedsa.hatv.util.parseSearchPageForVideos
+import com.muedsa.hatv.util.parsePagedVideosFromSearchPage
+import com.muedsa.hatv.util.parseSearchOptionsFromSearchPage
 import com.muedsa.hatv.util.parseWatchPageBody
 import io.reactivex.rxjava3.core.Single
 import org.jsoup.Jsoup
@@ -31,28 +31,30 @@ class HARepositoryImpl : IHARepository {
         }
     }
 
-    override fun fetchSearchTags(): Single<List<TagsRowModel>> {
+    override fun fetchSearchOptions(): Single<SearchOptionsModel> {
         return Single.create {
             val body = fetchGet(HAUrls.SEARCH).body()
-            it.onSuccess(parseSearchPageForTags(body))
+            it.onSuccess(parseSearchOptionsFromSearchPage(body))
         }
     }
 
     override fun fetchSearchVideos(
         query: String,
-        type: String,
-        tags: List<String>
-    ): Single<List<VideoInfoModel>> {
+        genre: String,
+        tags: List<String>,
+        page: Int
+    ): Single<PagedVideoInfoModel> {
         return Single.create {
             val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()
                 .clearQuery()
                 .appendQueryParameter("query", query)
-                .appendQueryParameter("type", type)
+                .appendQueryParameter("genre", genre)
+                .appendQueryParameter("page", page.toString())
             tags.forEach { tag ->
                 uriBuilder.appendQueryParameter("tags[]", tag)
             }
             val body = fetchGet(uriBuilder.build().toString()).body()
-            it.onSuccess(parseSearchPageForVideos(body))
+            it.onSuccess(parsePagedVideosFromSearchPage(body))
         }
     }
 
