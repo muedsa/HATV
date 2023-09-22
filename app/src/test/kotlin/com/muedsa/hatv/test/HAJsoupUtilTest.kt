@@ -128,7 +128,7 @@ class HAJsoupUtilTest {
             .get()
         val body = doc.body()
         val pagedVideos = parsePagedVideosFromSearchPage(body)
-        println("page: ${pagedVideos.videos}, maxPage: ${pagedVideos.maxPage}")
+        println("page: ${pagedVideos.page}, maxPage: ${pagedVideos.maxPage}, videoSize: ${pagedVideos.videos.size}")
         assert(pagedVideos.videos.isNotEmpty())
         val keySet = mutableSetOf<String>()
         pagedVideos.videos.forEach {
@@ -138,6 +138,24 @@ class HAJsoupUtilTest {
             assert(it.title.isNotEmpty())
             assert(!keySet.contains(it.key))
             keySet.add(it.key)
+        }
+        if (pagedVideos.page < pagedVideos.maxPage) {
+            Thread.sleep(1000)
+            uriBuilder.clearQuery()
+                .appendQueryParameter("query", "")
+                .appendQueryParameter("page", pagedVideos.maxPage.toString())
+            val lastPageVideos = Jsoup.connect(uriBuilder.build().toString())
+                .header(
+                    "User-Agent",
+                    "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+                )
+                .timeout(3 * 1000)
+                .proxy("127.0.0.1", 23334)
+                .get()
+                .body().let {
+                    parsePagedVideosFromSearchPage(it)
+                }
+            println("[LastPage] page: ${lastPageVideos.page}, maxPage: ${lastPageVideos.maxPage}, videoSize: ${lastPageVideos.videos.size}")
         }
     }
 }

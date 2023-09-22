@@ -207,7 +207,7 @@ fun parsePagedVideosFromSearchPage(body: Element): PagedVideoInfoModel {
                 }
             }
         }
-        it.select("a.page-link").toList()
+        it.select("li.page-item").toList()
             .map { i -> i.text() }
             .filter { i -> i.isDigitsOnly() }
             .map { i -> i.toInt() }
