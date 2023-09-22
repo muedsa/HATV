@@ -49,6 +49,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -69,6 +70,7 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(UnstableApi::class)
 @Composable
 fun DanmakuVideoPlayer(
+    debug: Boolean = false,
     videoPlayerInit: ExoPlayer.() -> Unit,
     danmakuPlayerInit: DanmakuPlayer.() -> Unit
 ) {
@@ -91,7 +93,9 @@ fun DanmakuVideoPlayer(
         ExoPlayer.Builder(context)
             .build()
             .also {
-                it.videoPlayerInit()
+                if (debug) {
+                    it.addAnalyticsListener(EventLogger())
+                }
                 it.addListener(object : Player.Listener {
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         if (isPlaying) {
@@ -102,6 +106,7 @@ fun DanmakuVideoPlayer(
                         }
                     }
                 })
+                it.videoPlayerInit()
             }
     }
 
@@ -151,16 +156,19 @@ fun DanmakuVideoPlayer(
 @OptIn(UnstableApi::class)
 @Composable
 fun SimpleVideoPlayer(
+    debug: Boolean = false,
     init: ExoPlayer.() -> Unit
 ) {
     val context = LocalContext.current
 
     val playerControlTicker = remember { mutableIntStateOf(0) }
 
-
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build()
             .also {
+                if (debug) {
+                    it.addAnalyticsListener(EventLogger())
+                }
                 it.init()
             }
     }

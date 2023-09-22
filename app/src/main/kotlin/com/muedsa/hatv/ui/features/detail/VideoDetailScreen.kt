@@ -32,6 +32,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.compose.tv.model.ContentModel
 import com.muedsa.compose.tv.theme.HorizontalPosterSize
 import com.muedsa.compose.tv.theme.ImageCardRowCardPadding
@@ -128,6 +129,12 @@ fun VideoDetailScreen(
                                     backgroundState.type = ScreenBackgroundType.SCRIM
                                 },
                             onClick = {
+                                FirebaseCrashlytics.getInstance().log(
+                                    "try play => \n" +
+                                            "id: ${videoDetail.id} \n" +
+                                            "title: ${videoDetail.title} \n" +
+                                            "url: ${videoDetail.playUrl}"
+                                )
                                 val intent = Intent(context, PlaybackActivity::class.java)
                                 intent.putExtra(PlaybackActivity.MEDIA_URL_KEY, videoDetail.playUrl)
                                 context.startActivity(intent)
