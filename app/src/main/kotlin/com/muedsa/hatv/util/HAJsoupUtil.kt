@@ -13,7 +13,7 @@ import com.muedsa.hatv.model.VideosRowModel
 import org.jsoup.nodes.Element
 import org.jsoup.select.Evaluator
 
-val VideoSourceUrlPattern = "const source = 'https://(.*?)';".toRegex()
+val VideoSourceUrlPattern = "const source = '(https://.*?)';".toRegex()
 
 fun parseHomePageBody(body: Element): List<VideosRowModel> {
     val list = mutableListOf<VideosRowModel>()
