@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.OutlinedTextField
@@ -82,7 +83,6 @@ fun SearchScreen(
 
     val searchText by viewModel.searchTextLD.observeAsState(initial = "")
     val searchGenre by viewModel.searchGenreLD.observeAsState(initial = "")
-    val selectedTags by viewModel.selectedTagsLD.observeAsState(initial = mutableSetOf())
 
     val searchLoad by viewModel.searchLoadLD.observeAsState(initial = LazyData.success(Unit))
     val isHorizontal by viewModel.horizontalCardLD.observeAsState(initial = true)
@@ -104,11 +104,6 @@ fun SearchScreen(
         if (searchLoad.type == LazyType.FAILURE) {
             errorMsgBoxState.error(searchLoad.error)
         }
-    }
-
-    LaunchedEffect(key1 = searchText, key2 = searchGenre, key3 = selectedTags.size) {
-        viewModel.pageLD.value = 1
-        viewModel.maxPageLD.value = 1
     }
 
     BackHandler(enabled = searchOptionsExpand) {
@@ -172,6 +167,16 @@ fun SearchScreen(
                             modifier = Modifier.size(ButtonDefaults.IconSize),
                             imageVector = if (searchOptionsExpand) Icons.Outlined.KeyboardArrowUp else Icons.Outlined.ArrowDropDown,
                             contentDescription = "展开搜索项"
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    OutlinedIconButton(onClick = {
+                        viewModel.resetSearch()
+                    }) {
+                        Icon(
+                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                            imageVector = Icons.Outlined.Refresh,
+                            contentDescription = "重置搜索项"
                         )
                     }
                 }
@@ -241,13 +246,9 @@ fun SearchScreen(
                                             } else null,
                                             onClick = {
                                                 Timber.d("click $tag")
-                                                if (tag.selected.value) {
-                                                    selectedTags.remove(tag.tag)
-                                                    tag.selected.value = false
-                                                } else {
-                                                    selectedTags.add(tag.tag)
-                                                    tag.selected.value = true
-                                                }
+                                                tag.selected.value = !tag.selected.value
+                                                viewModel.searchOptionsLD.value =
+                                                    viewModel.searchOptionsLD.value
                                             }
                                         ) {
                                             Text(text = tag.tag)

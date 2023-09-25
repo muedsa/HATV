@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,7 +25,6 @@ class SearchViewModel @Inject constructor(
 
     val searchTextLD = MutableLiveData("")
     val searchGenreLD = MutableLiveData("")
-    val selectedTagsLD = MutableLiveData<MutableSet<String>>(mutableSetOf())
 
     val searchVideosLD = MutableLiveData<MutableList<VideoInfoModel>>(mutableListOf())
     val pageLD = MutableLiveData(1)
@@ -37,7 +37,7 @@ class SearchViewModel @Inject constructor(
         repo.fetchSearchVideos(
             query = searchTextLD.value ?: "",
             genre = searchGenreLD.value ?: "",
-            tags = selectedTagsLD.value?.toList() ?: emptyList(),
+            tags = getSelectedTags(),
             page = 1
         ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -58,7 +58,7 @@ class SearchViewModel @Inject constructor(
         repo.fetchSearchVideos(
             query = searchTextLD.value ?: "",
             genre = searchGenreLD.value ?: "",
-            tags = selectedTagsLD.value?.toList() ?: emptyList(),
+            tags = getSelectedTags(),
             page = pageLD.value!! + 1
         ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -86,9 +86,47 @@ class SearchViewModel @Inject constructor(
             }, _disposable)
     }
 
+    fun resetSearch() {
+        searchTextLD.value = ""
+        searchGenreLD.value = ""
+        searchOptionsLD.value?.data?.tagsRows?.forEach {
+            it.tags.forEach { tag ->
+                if (tag.selected.value) {
+                    tag.selected.value = false
+                }
+            }
+        }
+        searchVideosLD.value?.clear()
+    }
+
+    private fun getSelectedTags(): List<String> {
+        return searchOptionsLD.value?.data?.tagsRows?.flatMap {
+            it.tags
+        }?.filter {
+            it.selected.value
+        }?.map {
+            it.tag
+        } ?: emptyList()
+    }
+
     init {
         addCloseable {
             _disposable.clear()
+        }
+        searchTextLD.observeForever {
+            pageLD.value = 1
+            maxPageLD.value = 1
+            Timber.d("search text change, next page disabled")
+        }
+        searchGenreLD.observeForever {
+            pageLD.value = 1
+            maxPageLD.value = 1
+            Timber.d("genre change, next page disabled")
+        }
+        searchOptionsLD.observeForever {
+            pageLD.value = 1
+            maxPageLD.value = 1
+            Timber.d("tag change, next page disabled")
         }
         initSearchOptions()
     }
