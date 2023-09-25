@@ -118,6 +118,7 @@ class HAJsoupUtilTest {
         val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()
             .appendQueryParameter("query", "")
             .appendQueryParameter("page", "1")
+            .appendQueryParameter("genre", "裏番")
         val doc = Jsoup.connect(uriBuilder.build().toString())
             .header(
                 "User-Agent",
@@ -128,7 +129,7 @@ class HAJsoupUtilTest {
             .get()
         val body = doc.body()
         val pagedVideos = parsePagedVideosFromSearchPage(body)
-        println("page: ${pagedVideos.page}, maxPage: ${pagedVideos.maxPage}, videoSize: ${pagedVideos.videos.size}")
+        println("page: ${pagedVideos.page}, maxPage: ${pagedVideos.maxPage}, videoSize: ${pagedVideos.videos.size}, horizontal: ${pagedVideos.horizontalVideoImage}")
         assert(pagedVideos.videos.isNotEmpty())
         val keySet = mutableSetOf<String>()
         pagedVideos.videos.forEach {
@@ -155,7 +156,7 @@ class HAJsoupUtilTest {
                 .body().let {
                     parsePagedVideosFromSearchPage(it)
                 }
-            println("[LastPage] page: ${lastPageVideos.page}, maxPage: ${lastPageVideos.maxPage}, videoSize: ${lastPageVideos.videos.size}")
+            println("[LastPage] page: ${lastPageVideos.page}, maxPage: ${lastPageVideos.maxPage}, videoSize: ${lastPageVideos.videos.size}, horizontal: ${lastPageVideos.horizontalVideoImage}")
         }
     }
 }

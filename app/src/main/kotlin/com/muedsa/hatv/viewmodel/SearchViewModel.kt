@@ -30,6 +30,7 @@ class SearchViewModel @Inject constructor(
     val pageLD = MutableLiveData(1)
     val maxPageLD = MutableLiveData(1)
     val searchLoadLD = MutableLiveData<LazyData<Unit>>()
+    val horizontalCardLD = MutableLiveData(true)
 
     fun fetchSearchVideos() {
         searchLoadLD.value = LazyData.init()
@@ -41,6 +42,7 @@ class SearchViewModel @Inject constructor(
         ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
+                horizontalCardLD.value = it.horizontalVideoImage
                 searchVideosLD.value = it.videos.toMutableList()
                 pageLD.value = it.page
                 maxPageLD.value = it.maxPage
@@ -66,6 +68,7 @@ class SearchViewModel @Inject constructor(
                 maxPageLD.value = it.maxPage
                 searchLoadLD.value = LazyData.success(Unit)
             }, {
+                searchLoadLD.value = LazyData.success(Unit)
                 FirebaseCrashlytics.getInstance().recordException(it)
             }, _disposable)
     }

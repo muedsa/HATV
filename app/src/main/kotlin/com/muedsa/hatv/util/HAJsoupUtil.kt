@@ -194,7 +194,11 @@ fun parseTagsFromSearchPage(body: Element): List<SearchTagsRowModel> {
 
 fun parsePagedVideosFromSearchPage(body: Element): PagedVideoInfoModel {
     val wrapper = body.selectFirst(Evaluator.Id("home-rows-wrapper"))!!
-    val videos = parseRowHorizontalItems(wrapper, ".search-doujin-videos")
+    val horizontal = wrapper.selectFirst(".home-rows-videos-div") == null
+    val videos = if (horizontal)
+        parseRowHorizontalItems(wrapper, ".search-doujin-videos")
+    else
+        parseRowVerticalItems(wrapper)
     val paginationEl = body.selectFirst("ul.pagination[role=\"navigation\"]")
     var page = 1
     var maxPage = 1
@@ -220,6 +224,7 @@ fun parsePagedVideosFromSearchPage(body: Element): PagedVideoInfoModel {
     return PagedVideoInfoModel(
         page = page,
         maxPage = maxPage,
-        videos = videos
+        videos = videos,
+        horizontalVideoImage = horizontal
     )
 }

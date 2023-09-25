@@ -1,5 +1,6 @@
 package com.muedsa.hatv.ui.features.home.search
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,6 +55,7 @@ import com.muedsa.compose.tv.theme.CustomerColor
 import com.muedsa.compose.tv.theme.HorizontalPosterSize
 import com.muedsa.compose.tv.theme.ImageCardRowCardPadding
 import com.muedsa.compose.tv.theme.ScreenPaddingLeft
+import com.muedsa.compose.tv.theme.VerticalPosterSize
 import com.muedsa.compose.tv.widget.CardType
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.compose.tv.widget.ImageContentCard
@@ -83,6 +85,7 @@ fun SearchScreen(
     val selectedTags by viewModel.selectedTagsLD.observeAsState(initial = mutableSetOf())
 
     val searchLoad by viewModel.searchLoadLD.observeAsState(initial = LazyData.success(Unit))
+    val isHorizontal by viewModel.horizontalCardLD.observeAsState(initial = true)
     val searchVideos by viewModel.searchVideosLD.observeAsState(initial = listOf())
     val searchPage by viewModel.pageLD.observeAsState(initial = 1)
     val searchMaxPage by viewModel.maxPageLD.observeAsState(initial = 1)
@@ -106,6 +109,10 @@ fun SearchScreen(
     LaunchedEffect(key1 = searchText, key2 = searchGenre, key3 = selectedTags.size) {
         viewModel.pageLD.value = 1
         viewModel.maxPageLD.value = 1
+    }
+
+    BackHandler(enabled = searchOptionsExpand) {
+        searchOptionsExpand = false
     }
 
     when (searchOptionsData.type) {
@@ -254,7 +261,7 @@ fun SearchScreen(
                 } else {
                     if (searchVideos.isNotEmpty()) {
                         TvLazyVerticalGrid(
-                            columns = TvGridCells.Adaptive(HorizontalPosterSize.width + ImageCardRowCardPadding),
+                            columns = TvGridCells.Adaptive(if (isHorizontal) HorizontalPosterSize.width else VerticalPosterSize.width + ImageCardRowCardPadding),
                             contentPadding = PaddingValues(top = ImageCardRowCardPadding)
                         ) {
                             items(
@@ -264,7 +271,7 @@ fun SearchScreen(
                                 ImageContentCard(
                                     modifier = Modifier.padding(end = ImageCardRowCardPadding),
                                     url = it.image,
-                                    imageSize = HorizontalPosterSize,
+                                    imageSize = if (isHorizontal) HorizontalPosterSize else VerticalPosterSize,
                                     type = CardType.STANDARD,
                                     model = ContentModel(it.title, subtitle = it.author),
                                     onItemFocus = {
@@ -282,7 +289,7 @@ fun SearchScreen(
                                 item {
                                     Card(
                                         modifier = Modifier
-                                            .size(HorizontalPosterSize)
+                                            .size(if (isHorizontal) HorizontalPosterSize else VerticalPosterSize)
                                             .padding(end = ImageCardRowCardPadding),
                                         onClick = {
                                             viewModel.fetchSearchVideosNextPage()

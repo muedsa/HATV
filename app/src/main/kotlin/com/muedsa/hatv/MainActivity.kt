@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import com.muedsa.compose.tv.theme.TvTheme
+import com.muedsa.compose.tv.widget.AppCloseHandler
 import com.muedsa.compose.tv.widget.ErrorMessageBox
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.hatv.model.LazyType
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
                     && viewModel.videosRowsData.value!!.type == LazyType.LOADING
         }
         setContent {
+
             TvTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -41,12 +43,16 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val errorMsgBoxState = remember { ErrorMessageBoxState() }
+                    AppCloseHandler {
+                        errorMsgBoxState.error("再次点击返回键退出")
+                    }
                     ErrorMessageBox(state = errorMsgBoxState) {
                         AppNavigation(
                             navController = rememberNavController(),
                             errorMsgBoxState = errorMsgBoxState
                         )
                     }
+
                 }
             }
         }

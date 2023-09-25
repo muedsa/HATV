@@ -61,7 +61,10 @@ class DemoHARepositoryImpl : IHARepository {
             )
         } else {
             Single.error(RuntimeException("just mock http request error! ＞﹏＜"))
-        }.delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
+        }.delay(
+            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
+            TimeUnit.MILLISECONDS
+        )
     }
 
     override fun fetchVideoDetail(videoId: String): Single<VideoDetailModel> {
@@ -82,7 +85,10 @@ class DemoHARepositoryImpl : IHARepository {
             )
         } else {
             Single.error(RuntimeException("just mock http request error! ＞﹏＜"))
-        }.delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
+        }.delay(
+            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
+            TimeUnit.MILLISECONDS
+        )
     }
 
     override fun fetchSearchOptions(): Single<SearchOptionsModel> {
@@ -120,7 +126,10 @@ class DemoHARepositoryImpl : IHARepository {
             )
         } else {
             Single.error(RuntimeException("just mock http request error! ＞﹏＜"))
-        }.delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
+        }.delay(
+            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
+            TimeUnit.MILLISECONDS
+        )
     }
 
     override fun fetchSearchVideos(
@@ -129,14 +138,18 @@ class DemoHARepositoryImpl : IHARepository {
         tags: List<String>,
         page: Int
     ): Single<PagedVideoInfoModel> {
+        val horizontal = genre != "123" && genre != "2333"
         return Single.just(
             PagedVideoInfoModel(
                 page = page,
                 maxPage = 5,
-                videos = getDemoVideos(titlePrefix = "P$page-")
+                videos = getDemoVideos(horizontal, titlePrefix = "P$page-"),
+                horizontalVideoImage = horizontal
             )
+        ).delay(
+            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
+            TimeUnit.MILLISECONDS
         )
-            .delay(SIMULATE_REQUEST_DELAY_MS, TimeUnit.MILLISECONDS)
     }
 
     private fun getDemoVideos(
@@ -292,7 +305,8 @@ class DemoHARepositoryImpl : IHARepository {
     }
 
     companion object {
-        private const val SIMULATE_REQUEST_DELAY_MS = 300L
+        private const val MIN_SIMULATE_REQUEST_DELAY_MS = 300L
+        private const val MAX_SIMULATE_REQUEST_DELAY_MS = 2300L
         private const val IMAGE_WIDTH = 1920
         private const val IMAGE_HEIGHT = 1080
         private val RANDOM = Random()

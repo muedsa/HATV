@@ -65,7 +65,7 @@ fun ErrorScreen(onRefresh: (() -> Unit)? = null) {
 fun FillTextScreen(context: String, model: Boolean = false) {
     var modifier = Modifier.fillMaxSize()
     if (model) {
-        modifier = modifier.background(MaterialTheme.colorScheme.surface)
+        modifier = modifier.background(MaterialTheme.colorScheme.surface.copy(0.35f))
     }
     Column(
         modifier = modifier
