@@ -16,12 +16,12 @@ fun AppCloseHandler(
 ) {
 
     var allowBack by remember { mutableStateOf(false) }
-    var ticker by remember { mutableIntStateOf(8) }
+    var tick by remember { mutableIntStateOf(8) }
 
-    LaunchedEffect(key1 = ticker) {
+    LaunchedEffect(key1 = tick) {
         delay(250)
-        if (ticker > 0) {
-            ticker--
+        if (tick > 0) {
+            tick--
         } else {
             allowBack = false
         }
@@ -29,7 +29,7 @@ fun AppCloseHandler(
 
     BackHandler(enabled = !allowBack) {
         allowBack = true
-        ticker = 8
+        tick = 8
         try {
             onAllowBack()
         } catch (_: Throwable) {

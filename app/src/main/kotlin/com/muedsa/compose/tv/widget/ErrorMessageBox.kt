@@ -25,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
@@ -38,15 +37,12 @@ fun ErrorMessageBox(
     state: ErrorMessageBoxState = remember { ErrorMessageBoxState() },
     content: @Composable () -> Unit = {}
 ) {
-    LaunchedEffect(key1 = Unit) {
-        while (true) {
-            delay(1.seconds)
-            if (state.duration > 0) {
-                state.duration--
-                if (state.duration == 0) {
-                    state.visible = false
-                }
-            }
+    LaunchedEffect(key1 = state.duration) {
+        delay(1.seconds)
+        if (state.duration > 0) {
+            state.duration--
+        } else {
+            state.visible = false
         }
     }
     content()
@@ -67,11 +63,11 @@ fun ErrorMessageBox(
                         elevation = 10.dp,
                         shape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
                     )
-                    .background(Color.Red)
+                    .background(color = MaterialTheme.colorScheme.errorContainer)
                     .padding(20.dp)
                     .wrapContentWidth(Alignment.Start),
                 text = "${state.message}",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onErrorContainer,
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.weight(2f))
