@@ -19,20 +19,22 @@ import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.ui.navigation.AppNavigation
 import com.muedsa.hatv.viewmodel.HomePageViewModel
+import com.muedsa.hatv.viewmodel.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: HomePageViewModel by viewModels()
+    private val homePageViewModel: HomePageViewModel by viewModels()
+    private val searchViewModel: SearchViewModel by viewModels()
 
     @OptIn(ExperimentalTvMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         splashScreen.setKeepOnScreenCondition {
-            viewModel.videosRowsData.value != null
-                    && viewModel.videosRowsData.value!!.type == LazyType.LOADING
+            homePageViewModel.videosRowsDataState.value.type == LazyType.LOADING
+                    && searchViewModel.searchOptionsState.value.type == LazyType.LOADING
         }
         setContent {
 

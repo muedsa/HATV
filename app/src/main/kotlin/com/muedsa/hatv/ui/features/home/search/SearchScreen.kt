@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
@@ -28,7 +29,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,7 +62,6 @@ import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.compose.tv.widget.ImageContentCard
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
-import com.muedsa.hatv.model.LazyData
 import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.ui.features.others.ErrorScreen
 import com.muedsa.hatv.ui.features.others.LoadingScreen
@@ -79,16 +78,18 @@ fun SearchScreen(
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> }
 ) {
 
-    val searchOptionsData by viewModel.searchOptionsLD.observeAsState(initial = LazyData.init())
+    val searchOptionsData by remember { viewModel.searchOptionsState }
 
-    val searchText by viewModel.searchTextLD.observeAsState(initial = "")
-    val searchGenre by viewModel.searchGenreLD.observeAsState(initial = "")
+    var searchText by remember { viewModel.searchTextState }
+    var searchGenre by remember { viewModel.searchGenreState }
+    val searchTags = remember { viewModel.searchTagsState }
 
-    val searchLoad by viewModel.searchLoadLD.observeAsState(initial = LazyData.success(Unit))
-    val isHorizontal by viewModel.horizontalCardLD.observeAsState(initial = true)
-    val searchVideos by viewModel.searchVideosLD.observeAsState(initial = listOf())
-    val searchPage by viewModel.pageLD.observeAsState(initial = 1)
-    val searchMaxPage by viewModel.maxPageLD.observeAsState(initial = 1)
+    val searchLoad by remember { viewModel.searchLoadState }
+
+    val isHorizontal by remember { viewModel.horizontalCardState }
+    val searchVideos = remember { viewModel.searchVideosState }
+    val searchPage by remember { viewModel.pageState }
+    val searchMaxPage by remember { viewModel.maxPageState }
 
     var searchOptionsExpand by remember {
         mutableStateOf(false)
@@ -142,7 +143,7 @@ fun SearchScreen(
                         ),
                         value = searchText,
                         onValueChange = {
-                            viewModel.searchTextLD.value = it
+                            searchText = it
                         },
                         singleLine = true
                     )
@@ -187,6 +188,39 @@ fun SearchScreen(
                     ) {
                         val searchOptions = searchOptionsData.data!!
                         TvLazyColumn(contentPadding = PaddingValues(top = ImageCardRowCardPadding)) {
+                            if (searchTags.isNotEmpty()) {
+                                item {
+                                    Text(
+                                        text = "选择的标签",
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    FlowRow {
+                                        for (tag in searchTags) {
+                                            FilterChip(
+                                                modifier = Modifier.padding(8.dp),
+                                                selected = true,
+                                                trailingIcon = {
+                                                    Icon(
+                                                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                                        imageVector = Icons.Outlined.Clear,
+                                                        contentDescription = "选择${tag}"
+                                                    )
+                                                },
+                                                onClick = {
+                                                    Timber.d("click selected tag: $tag")
+                                                    viewModel.removeSearchTag(tag)
+                                                }
+                                            ) {
+                                                Text(text = tag)
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+
                             item {
                                 Text(
                                     text = "影片类型",
@@ -210,7 +244,7 @@ fun SearchScreen(
                                             } else null,
                                             onClick = {
                                                 Timber.d("click Genre: $genre")
-                                                viewModel.searchGenreLD.value =
+                                                searchGenre =
                                                     if (genre == searchGenre) "" else genre
                                             }
                                         ) {
@@ -232,26 +266,29 @@ fun SearchScreen(
                                 Spacer(modifier = Modifier.height(4.dp))
                                 FlowRow {
                                     for (tag in it.tags) {
+                                        val selected = searchTags.contains(tag)
                                         FilterChip(
                                             modifier = Modifier.padding(8.dp),
-                                            selected = tag.selected.value,
-                                            leadingIcon = if (tag.selected.value) {
+                                            selected = selected,
+                                            leadingIcon = if (selected) {
                                                 {
                                                     Icon(
                                                         modifier = Modifier.size(FilterChipDefaults.IconSize),
                                                         imageVector = Icons.Outlined.Check,
-                                                        contentDescription = "选择${tag.tag}"
+                                                        contentDescription = "选择${tag}"
                                                     )
                                                 }
                                             } else null,
                                             onClick = {
                                                 Timber.d("click $tag")
-                                                tag.selected.value = !tag.selected.value
-                                                viewModel.searchOptionsLD.value =
-                                                    viewModel.searchOptionsLD.value
+                                                if (selected) {
+                                                    viewModel.removeSearchTag(tag)
+                                                } else {
+                                                    viewModel.addSearchTag(tag)
+                                                }
                                             }
                                         ) {
-                                            Text(text = tag.tag)
+                                            Text(text = tag)
                                         }
                                     }
                                 }

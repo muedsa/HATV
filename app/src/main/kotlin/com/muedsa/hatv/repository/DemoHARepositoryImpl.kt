@@ -2,133 +2,107 @@ package com.muedsa.hatv.repository
 
 import com.muedsa.hatv.model.PagedVideoInfoModel
 import com.muedsa.hatv.model.SearchOptionsModel
-import com.muedsa.hatv.model.SearchTagModel
 import com.muedsa.hatv.model.SearchTagsRowModel
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.model.VideosRowModel
-import io.reactivex.rxjava3.core.Single
 import java.util.Random
-import java.util.concurrent.TimeUnit
 
 class DemoHARepositoryImpl : IHARepository {
 
-    override fun fetchHomeVideosRows(): Single<List<VideosRowModel>> {
-        return if (RANDOM.nextInt(10) < 8) {
-            Single.just(
-                listOf(
-                    VideosRowModel(
-                        title = "Title One",
-                        videos = getDemoVideos(false),
-                        horizontalVideoImage = false
-                    ),
-                    VideosRowModel(
-                        title = "Title Two",
-                        videos = getDemoVideos(true),
-                        horizontalVideoImage = true
-                    ),
-                    VideosRowModel(
-                        title = "Title Three",
-                        videos = getDemoVideos(true),
-                        horizontalVideoImage = true
-                    ),
-                    VideosRowModel(
-                        title = "Title Four",
-                        videos = getDemoVideos(true),
-                        horizontalVideoImage = true
-                    ),
-                    VideosRowModel(
-                        title = "Title Five",
-                        videos = getDemoVideos(false),
-                        horizontalVideoImage = false
-                    ),
-                    VideosRowModel(
-                        title = "Title 6",
-                        videos = getDemoVideos(true),
-                        horizontalVideoImage = true
-                    ),
-                    VideosRowModel(
-                        title = "Title 7",
-                        videos = getDemoVideos(true),
-                        horizontalVideoImage = true
-                    ),
-                    VideosRowModel(
-                        title = "Title 8",
-                        videos = getDemoVideos(true),
-                        horizontalVideoImage = true
-                    ),
-                )
-            )
-        } else {
-            Single.error(RuntimeException("just mock http request error! ＞﹏＜"))
-        }.delay(
-            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
-            TimeUnit.MILLISECONDS
+    override fun fetchHomeVideosRows(): List<VideosRowModel> {
+        mockWaitNetwork()
+        return listOf(
+            VideosRowModel(
+                title = "Title One",
+                videos = getDemoVideos(false),
+                horizontalVideoImage = false
+            ),
+            VideosRowModel(
+                title = "Title Two",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
+            VideosRowModel(
+                title = "Title Three",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
+            VideosRowModel(
+                title = "Title Four",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
+            VideosRowModel(
+                title = "Title Five",
+                videos = getDemoVideos(false),
+                horizontalVideoImage = false
+            ),
+            VideosRowModel(
+                title = "Title 6",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
+            VideosRowModel(
+                title = "Title 7",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
+            VideosRowModel(
+                title = "Title 8",
+                videos = getDemoVideos(true),
+                horizontalVideoImage = true
+            ),
         )
     }
 
-    override fun fetchVideoDetail(videoId: String): Single<VideoDetailModel> {
-        return if (RANDOM.nextInt(10) < 8) {
-            val videos = getDemoVideos()
-            val index = RANDOM.nextInt(videos.size - 1)
-            val video = videos[index]
-            Single.just(
-                VideoDetailModel(
-                    id = video.id,
-                    image = video.image,
-                    title = video.title,
-                    author = video.author,
-                    desc = video.desc,
-                    playUrl = "https://media.w3.org/2010/05/sintel/trailer.mp4",
-                    videoList = videos
-                )
-            )
-        } else {
-            Single.error(RuntimeException("just mock http request error! ＞﹏＜"))
-        }.delay(
-            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
-            TimeUnit.MILLISECONDS
+    override fun fetchVideoDetail(videoId: String): VideoDetailModel {
+        mockWaitNetwork()
+        val videos = getDemoVideos()
+        val index = RANDOM.nextInt(videos.size - 1)
+        val video = videos[index]
+        return VideoDetailModel(
+            id = video.id,
+            image = video.image,
+            title = video.title,
+            author = video.author,
+            desc = video.desc,
+            tags = getTags("Tag", RANDOM.nextInt(10)),
+            playUrl = "https://media.w3.org/2010/05/sintel/trailer.mp4",
+            videoList = videos
         )
     }
 
-    override fun fetchSearchOptions(): Single<SearchOptionsModel> {
-        return if (RANDOM.nextInt(10) < 8) {
-            Single.just(
-                SearchOptionsModel(
-                    genres = listOf("全部", "123", "233", "HAHAHAHA", "WOW"),
-                    tagsRows = listOf(
-                        SearchTagsRowModel(
-                            title = "Tag Group One",
-                            tags = getTags("TagOne", 5)
-                        ),
-                        SearchTagsRowModel(
-                            title = "Tag Group Two",
-                            tags = getTags("TagTwo", 10)
-                        ),
-                        SearchTagsRowModel(
-                            title = "Tag Group Three",
-                            tags = getTags("TagThree", 15)
-                        ),
-                        SearchTagsRowModel(
-                            title = "Tag Group Four",
-                            tags = getTags("TagFour", 30)
-                        ),
-                        SearchTagsRowModel(
-                            title = "Tag Group Five",
-                            tags = getTags("TagFive", 20)
-                        ),
-                        SearchTagsRowModel(
-                            title = "Tag Group Six",
-                            tags = getTags("TagSix", 1)
-                        )
-                    )
+    override fun fetchSearchOptions(): SearchOptionsModel {
+        mockWaitNetwork()
+        return SearchOptionsModel(
+            genres = listOf("全部", "123", "233", "HAHAHAHA", "WOW"),
+            tagsRows = listOf(
+                SearchTagsRowModel(
+                    title = "Tag Group One",
+                    tags = getTags("TagOne", 5)
+                ),
+                SearchTagsRowModel(
+                    title = "Tag Group Two",
+                    tags = getTags("TagTwo", 10)
+                ),
+                SearchTagsRowModel(
+                    title = "Tag Group Three",
+                    tags = getTags("TagThree", 15)
+                ),
+                SearchTagsRowModel(
+                    title = "Tag Group Four",
+                    tags = getTags("TagFour", 30)
+                ),
+                SearchTagsRowModel(
+                    title = "Tag Group Five",
+                    tags = getTags("TagFive", 20)
+                ),
+                SearchTagsRowModel(
+                    title = "Tag Group Six",
+                    tags = getTags("TagSix", 1)
                 )
             )
-        } else {
-            Single.error(RuntimeException("just mock http request error! ＞﹏＜"))
-        }.delay(
-            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
-            TimeUnit.MILLISECONDS
         )
     }
 
@@ -137,18 +111,14 @@ class DemoHARepositoryImpl : IHARepository {
         genre: String,
         tags: List<String>,
         page: Int
-    ): Single<PagedVideoInfoModel> {
+    ): PagedVideoInfoModel {
+        mockWaitNetwork()
         val horizontal = genre != "123" && genre != "2333"
-        return Single.just(
-            PagedVideoInfoModel(
-                page = page,
-                maxPage = 5,
-                videos = getDemoVideos(horizontal, titlePrefix = "P$page-"),
-                horizontalVideoImage = horizontal
-            )
-        ).delay(
-            MIN_SIMULATE_REQUEST_DELAY_MS + RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt()),
-            TimeUnit.MILLISECONDS
+        return PagedVideoInfoModel(
+            page = page,
+            maxPage = 5,
+            videos = getDemoVideos(horizontal, titlePrefix = "P$page-"),
+            horizontalVideoImage = horizontal
         )
     }
 
@@ -296,12 +266,22 @@ class DemoHARepositoryImpl : IHARepository {
         ).shuffled()
     }
 
-    private fun getTags(label: String, num: Int = 10): List<SearchTagModel> {
+    private fun getTags(label: String, num: Int = 10): List<String> {
         return buildList(capacity = num) {
             for (i in 0..num) {
-                add(SearchTagModel("$label-$i"))
+                add("$label-$i")
             }
         }
+    }
+
+    private fun mockWaitNetwork() {
+        if (RANDOM.nextInt(10) > 8) {
+            throw RuntimeException("just mock http request error! ＞﹏＜")
+        }
+        Thread.sleep(
+            MIN_SIMULATE_REQUEST_DELAY_MS +
+                    RANDOM.nextInt((MAX_SIMULATE_REQUEST_DELAY_MS - MIN_SIMULATE_REQUEST_DELAY_MS).toInt())
+        )
     }
 
     companion object {

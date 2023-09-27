@@ -1,16 +1,20 @@
 package com.muedsa.hatv.viewmodel
 
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.hatv.model.LazyData
 import com.muedsa.hatv.model.SearchOptionsModel
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.repository.IHARepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -19,114 +23,136 @@ class SearchViewModel @Inject constructor(
     private val repo: IHARepository
 ) : ViewModel() {
 
-    private val _disposable = CompositeDisposable()
+    val searchOptionsState = mutableStateOf<LazyData<SearchOptionsModel>>(LazyData.init())
 
-    val searchOptionsLD = MutableLiveData<LazyData<SearchOptionsModel>>(LazyData.init())
+    val searchTextState = mutableStateOf("")
+    val searchGenreState = mutableStateOf("")
+    val searchTagsState = mutableStateListOf<String>()
 
-    val searchTextLD = MutableLiveData("")
-    val searchGenreLD = MutableLiveData("")
+    val searchVideosState = mutableStateListOf<VideoInfoModel>()
 
-    val searchVideosLD = MutableLiveData<MutableList<VideoInfoModel>>(mutableListOf())
-    val pageLD = MutableLiveData(1)
-    val maxPageLD = MutableLiveData(1)
-    val searchLoadLD = MutableLiveData<LazyData<Unit>>()
-    val horizontalCardLD = MutableLiveData(true)
+    val pageState = mutableIntStateOf(1)
+    val maxPageState = mutableIntStateOf(1)
+    val searchLoadState = mutableStateOf(LazyData.success(Unit))
+    val horizontalCardState = mutableStateOf(true)
 
     fun fetchSearchVideos() {
-        searchLoadLD.value = LazyData.init()
-        repo.fetchSearchVideos(
-            query = searchTextLD.value ?: "",
-            genre = searchGenreLD.value ?: "",
-            tags = getSelectedTags(),
-            page = 1
-        ).subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                horizontalCardLD.value = it.horizontalVideoImage
-                searchVideosLD.value = it.videos.toMutableList()
-                pageLD.value = it.page
-                maxPageLD.value = it.maxPage
-                searchLoadLD.value = LazyData.success(Unit)
-            }, {
-                searchVideosLD.value = mutableListOf()
-                FirebaseCrashlytics.getInstance().recordException(it)
-            }, _disposable)
+        searchLoadState.value = LazyData.init()
+        viewModelScope.launch(context = Dispatchers.IO) {
+            try {
+                repo.fetchSearchVideos(
+                    query = searchTextState.value,
+                    genre = searchGenreState.value,
+                    tags = searchTagsState,
+                    page = 1
+                ).let {
+                    horizontalCardState.value = it.horizontalVideoImage
+                    searchVideosState.clear()
+                    searchVideosState.addAll(it.videos)
+                    pageState.intValue = it.page
+                    maxPageState.intValue = it.maxPage
+                    searchLoadState.value = LazyData.success(Unit)
+                }
+            } catch (t: Throwable) {
+                Timber.d(t)
+                withContext(Dispatchers.Main) {
+                    searchVideosState.clear()
+                    searchLoadState.value = LazyData.fail(t)
+                }
+                FirebaseCrashlytics.getInstance().recordException(t)
+            }
+        }
     }
 
     fun fetchSearchVideosNextPage() {
-        searchLoadLD.value = LazyData.init()
-        repo.fetchSearchVideos(
-            query = searchTextLD.value ?: "",
-            genre = searchGenreLD.value ?: "",
-            tags = getSelectedTags(),
-            page = pageLD.value!! + 1
-        ).subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                searchVideosLD.value!!.addAll(it.videos)
-                pageLD.value = it.page
-                maxPageLD.value = it.maxPage
-                searchLoadLD.value = LazyData.success(Unit)
-            }, {
-                searchLoadLD.value = LazyData.success(Unit)
-                FirebaseCrashlytics.getInstance().recordException(it)
-            }, _disposable)
+        searchLoadState.value = LazyData.init()
+        viewModelScope.launch(context = Dispatchers.IO) {
+            try {
+                repo.fetchSearchVideos(
+                    query = searchTextState.value,
+                    genre = searchGenreState.value,
+                    tags = searchTagsState,
+                    page = pageState.intValue + 1
+                ).let {
+                    searchVideosState.addAll(it.videos)
+                    pageState.intValue = it.page
+                    maxPageState.intValue = it.maxPage
+                    searchLoadState.value = LazyData.success(Unit)
+                }
+            } catch (t: Throwable) {
+                Timber.d(t)
+                withContext(Dispatchers.Main) {
+                    searchLoadState.value = LazyData.fail(t)
+                }
+                FirebaseCrashlytics.getInstance().recordException(t)
+            }
+        }
     }
 
     fun initSearchOptions() {
-        searchOptionsLD.value = LazyData.init()
-        repo.fetchSearchOptions()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                searchOptionsLD.value = LazyData.success(it)
-            }, {
-                searchOptionsLD.value = LazyData.fail(it)
-                FirebaseCrashlytics.getInstance().recordException(it)
-            }, _disposable)
+        Timber.d("initSearchOptions start")
+        searchOptionsState.value = LazyData.init()
+        viewModelScope.launch(context = Dispatchers.IO) {
+            try {
+                repo.fetchSearchOptions().let {
+                    Timber.d("initSearchOptions success")
+                    searchOptionsState.value = LazyData.success(it)
+                }
+            } catch (t: Throwable) {
+                Timber.d(t)
+                withContext(Dispatchers.Main) {
+                    searchOptionsState.value = LazyData.fail(t)
+                }
+                FirebaseCrashlytics.getInstance().recordException(t)
+            }
+        }
+    }
+
+    fun addSearchTag(tagName: String) {
+        if (!searchTagsState.contains(tagName)) {
+            searchTagsState.add(tagName)
+        }
+    }
+
+    fun removeSearchTag(tagName: String) {
+        searchTagsState.remove(tagName)
     }
 
     fun resetSearch() {
-        searchTextLD.value = ""
-        searchGenreLD.value = ""
-        searchOptionsLD.value?.data?.tagsRows?.forEach {
-            it.tags.forEach { tag ->
-                if (tag.selected.value) {
-                    tag.selected.value = false
-                }
-            }
-        }
-        searchVideosLD.value?.clear()
-    }
-
-    private fun getSelectedTags(): List<String> {
-        return searchOptionsLD.value?.data?.tagsRows?.flatMap {
-            it.tags
-        }?.filter {
-            it.selected.value
-        }?.map {
-            it.tag
-        } ?: emptyList()
+        searchTextState.value = ""
+        searchGenreState.value = ""
+        searchTagsState.clear()
+        searchVideosState.clear()
+        pageState.intValue = 1
+        maxPageState.intValue = 1
     }
 
     init {
-        addCloseable {
-            _disposable.clear()
-        }
-        searchTextLD.observeForever {
-            pageLD.value = 1
-            maxPageLD.value = 1
-            Timber.d("search text change, next page disabled")
-        }
-        searchGenreLD.observeForever {
-            pageLD.value = 1
-            maxPageLD.value = 1
-            Timber.d("genre change, next page disabled")
-        }
-        searchOptionsLD.observeForever {
-            pageLD.value = 1
-            maxPageLD.value = 1
-            Timber.d("tag change, next page disabled")
+        Timber.d("SearchViewModel init")
+        viewModelScope.launch {
+            Timber.d("SearchViewModel init viewModelScope launch")
+
+            snapshotFlow { searchTextState }.collect {
+                pageState.intValue = 1
+                maxPageState.intValue = 1
+                Timber.d("search params [searchText] change, next page disabled")
+            }
+
+            snapshotFlow {
+                searchGenreState
+            }.collect {
+                pageState.intValue = 1
+                maxPageState.intValue = 1
+                Timber.d("search params [searchGenreState] change, next page disabled")
+            }
+
+            snapshotFlow {
+                searchTagsState
+            }.collect {
+                pageState.intValue = 1
+                maxPageState.intValue = 1
+                Timber.d("search params [searchTagsState] change, next page disabled")
+            }
         }
         initSearchOptions()
     }

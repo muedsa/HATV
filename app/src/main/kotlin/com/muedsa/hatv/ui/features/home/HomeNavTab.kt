@@ -31,6 +31,7 @@ import com.muedsa.hatv.ui.features.home.search.SearchScreen
 import com.muedsa.hatv.ui.features.others.NotFoundScreen
 import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.HomePageViewModel
+import com.muedsa.hatv.viewmodel.SearchViewModel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -42,12 +43,14 @@ val tabs = listOf(
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun HomeNavTab(
+    tabIndex: Int = 0,
     homePageViewModel: HomePageViewModel,
+    searchViewModel: SearchViewModel,
     backgroundState: ScreenBackgroundState = ScreenBackgroundState(),
     errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> },
 ) {
-    var focusedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    var focusedTabIndex by rememberSaveable { mutableIntStateOf(tabIndex) }
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(focusedTabIndex) }
 
     var tabPanelIndex by remember { mutableIntStateOf(selectedTabIndex) }
@@ -107,6 +110,7 @@ fun HomeNavTab(
         HomeContent(
             tabIndex = tabPanelIndex,
             homePageViewModel = homePageViewModel,
+            searchViewModel = searchViewModel,
             backgroundState = backgroundState,
             errorMsgBoxState = errorMsgBoxState,
             onNavigate = onNavigate
@@ -118,6 +122,7 @@ fun HomeNavTab(
 fun HomeContent(
     tabIndex: Int,
     homePageViewModel: HomePageViewModel,
+    searchViewModel: SearchViewModel,
     backgroundState: ScreenBackgroundState,
     errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> },
@@ -130,6 +135,7 @@ fun HomeContent(
             onNavigate = onNavigate
         )
         1 -> SearchScreen(
+            viewModel = searchViewModel,
             backgroundState = backgroundState,
             errorMsgBoxState = errorMsgBoxState,
             onNavigate = onNavigate

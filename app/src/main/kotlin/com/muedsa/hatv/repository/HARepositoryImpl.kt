@@ -9,33 +9,26 @@ import com.muedsa.hatv.util.parseHomePageBody
 import com.muedsa.hatv.util.parsePagedVideosFromSearchPage
 import com.muedsa.hatv.util.parseSearchOptionsFromSearchPage
 import com.muedsa.hatv.util.parseWatchPageBody
-import io.reactivex.rxjava3.core.Single
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
 class HARepositoryImpl : IHARepository {
-    override fun fetchHomeVideosRows(): Single<List<VideosRowModel>> {
-        return Single.create {
-            val body = fetchGet(HAUrls.HOME).body()
-            it.onSuccess(parseHomePageBody(body).filter { row -> row.videos.isNotEmpty() })
-        }
+    override fun fetchHomeVideosRows(): List<VideosRowModel> {
+        val body = fetchGet(HAUrls.HOME).body()
+        return parseHomePageBody(body).filter { row -> row.videos.isNotEmpty() }
     }
 
-    override fun fetchVideoDetail(videoId: String): Single<VideoDetailModel> {
-        return Single.create {
-            val uriBuilder = Uri.parse(HAUrls.WATCH).buildUpon()
-                .clearQuery()
-                .appendQueryParameter("v", videoId)
-            val body = fetchGet(uriBuilder.build().toString()).body()
-            it.onSuccess(parseWatchPageBody(body))
-        }
+    override fun fetchVideoDetail(videoId: String): VideoDetailModel {
+        val uriBuilder = Uri.parse(HAUrls.WATCH).buildUpon()
+            .clearQuery()
+            .appendQueryParameter("v", videoId)
+        val body = fetchGet(uriBuilder.build().toString()).body()
+        return parseWatchPageBody(body)
     }
 
-    override fun fetchSearchOptions(): Single<SearchOptionsModel> {
-        return Single.create {
-            val body = fetchGet(HAUrls.SEARCH).body()
-            it.onSuccess(parseSearchOptionsFromSearchPage(body))
-        }
+    override fun fetchSearchOptions(): SearchOptionsModel {
+        val body = fetchGet(HAUrls.SEARCH).body()
+        return parseSearchOptionsFromSearchPage(body)
     }
 
     override fun fetchSearchVideos(
@@ -43,19 +36,17 @@ class HARepositoryImpl : IHARepository {
         genre: String,
         tags: List<String>,
         page: Int
-    ): Single<PagedVideoInfoModel> {
-        return Single.create {
-            val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()
-                .clearQuery()
-                .appendQueryParameter("query", query)
-                .appendQueryParameter("genre", genre)
-                .appendQueryParameter("page", page.toString())
-            tags.forEach { tag ->
-                uriBuilder.appendQueryParameter("tags[]", tag)
-            }
-            val body = fetchGet(uriBuilder.build().toString()).body()
-            it.onSuccess(parsePagedVideosFromSearchPage(body))
+    ): PagedVideoInfoModel {
+        val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()
+            .clearQuery()
+            .appendQueryParameter("query", query)
+            .appendQueryParameter("genre", genre)
+            .appendQueryParameter("page", page.toString())
+        tags.forEach { tag ->
+            uriBuilder.appendQueryParameter("tags[]", tag)
         }
+        val body = fetchGet(uriBuilder.build().toString()).body()
+        return parsePagedVideosFromSearchPage(body)
     }
 
     private fun fetchGet(url: String): Document {
@@ -67,6 +58,7 @@ class HARepositoryImpl : IHARepository {
             .timeout(TIMEOUT_MS)
             .get()
     }
+
     companion object {
         const val TIMEOUT_MS = 10 * 1000
     }

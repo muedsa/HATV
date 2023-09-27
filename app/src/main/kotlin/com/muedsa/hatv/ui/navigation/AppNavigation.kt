@@ -12,6 +12,7 @@ import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.hatv.ui.features.detail.VideoDetailScreen
 import com.muedsa.hatv.ui.features.home.HomeScreen
 import com.muedsa.hatv.ui.features.others.NotFoundScreen
+import com.muedsa.hatv.viewmodel.SearchViewModel
 
 @Composable
 fun AppNavigation(navController: NavHostController, errorMsgBoxState: ErrorMessageBoxState) {
@@ -19,12 +20,23 @@ fun AppNavigation(navController: NavHostController, errorMsgBoxState: ErrorMessa
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
     }
+    val searchViewModel: SearchViewModel = hiltViewModel(viewModelStoreOwner)
 
-    NavHost(navController = navController, startDestination = NavigationItems.Home.path) {
+    NavHost(
+        navController = navController,
+        startDestination = buildRoute(NavigationItems.Home, listOf("0"))
+    ) {
 
-        composable(NavigationItems.Home.path) {
+        composable(
+            route = NavigationItems.Home.path,
+            arguments = listOf(navArgument("tabIndex") {
+                type = NavType.IntType
+            })
+        ) {
             HomeScreen(
+                tabIndex = checkNotNull(it.arguments?.getInt("tabIndex")),
                 homePageViewModel = hiltViewModel(viewModelStoreOwner),
+                searchViewModel = searchViewModel,
                 errorMsgBoxState = errorMsgBoxState,
                 onNavigate = { navItem, pathParams ->
                     onNavigate(navController, navItem, pathParams)
@@ -33,12 +45,18 @@ fun AppNavigation(navController: NavHostController, errorMsgBoxState: ErrorMessa
         }
 
         composable(
-            NavigationItems.Detail.path,
+            route = NavigationItems.Detail.path,
             arguments = listOf(navArgument("videoId") {
                 type = NavType.StringType
             })
         ) {
-            VideoDetailScreen(errorMsgBoxState = errorMsgBoxState)
+            VideoDetailScreen(
+                searchViewModel = searchViewModel,
+                errorMsgBoxState = errorMsgBoxState,
+                onNavigate = { navItem, pathParams ->
+                    onNavigate(navController, navItem, pathParams)
+                }
+            )
         }
 
         composable(NavigationItems.NotFound.path) {
@@ -47,11 +65,10 @@ fun AppNavigation(navController: NavHostController, errorMsgBoxState: ErrorMessa
     }
 }
 
-fun onNavigate(
-    navController: NavHostController,
+fun buildRoute(
     navItem: NavigationItems,
     pathParams: List<String>?
-) {
+): String {
     var route = navItem.path
     if (!navItem.pathParams.isNullOrEmpty()) {
         checkNotNull(pathParams)
@@ -60,5 +77,13 @@ fun onNavigate(
             route = route.replace(navItem.pathParams[i], pathParams[i])
         }
     }
-    navController.navigate(route)
+    return route
+}
+
+fun onNavigate(
+    navController: NavHostController,
+    navItem: NavigationItems,
+    pathParams: List<String>?
+) {
+    navController.navigate(buildRoute(navItem, pathParams))
 }

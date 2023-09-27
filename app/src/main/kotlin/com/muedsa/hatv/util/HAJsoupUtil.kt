@@ -5,7 +5,6 @@ import androidx.compose.ui.util.fastJoinToString
 import androidx.core.text.isDigitsOnly
 import com.muedsa.hatv.model.PagedVideoInfoModel
 import com.muedsa.hatv.model.SearchOptionsModel
-import com.muedsa.hatv.model.SearchTagModel
 import com.muedsa.hatv.model.SearchTagsRowModel
 import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.model.VideoInfoModel
@@ -140,6 +139,16 @@ fun parseWatchPageBody(body: Element): VideoDetailModel {
     val desc = detailEl.child(2).text()
 
     val playlistEl = body.selectFirst(Evaluator.Id("playlist-scroll"))
+
+    val tagsWrapperEl = body.selectFirst(".video-details-wrapper.video-tags-wrapper")
+    val tags = tagsWrapperEl?.let {
+        it.select(".single-video-tag:not([data-toggle])")
+            .map { el ->
+                el.text()
+            }.filter { text ->
+                text.isNotEmpty()
+            }
+    } ?: emptyList()
     val videos = if (playlistEl != null)
         parseRowHorizontalItems(playlistEl, ".related-watch-wrap")
     else
@@ -150,6 +159,7 @@ fun parseWatchPageBody(body: Element): VideoDetailModel {
         title = title,
         author = author,
         desc = desc,
+        tags = tags,
         playUrl = playUrl,
         videoList = videos,
     )
@@ -185,8 +195,8 @@ fun parseTagsFromSearchPage(body: Element): List<SearchTagsRowModel> {
                 )
             )
         } else {
-            (list.last().tags as MutableList<SearchTagModel>)
-                .add(SearchTagModel(it.selectFirst("input[name=\"tags[]\"]")!!.`val`()))
+            (list.last().tags as MutableList<String>)
+                .add(it.selectFirst("input[name=\"tags[]\"]")!!.`val`())
         }
     }
     return list

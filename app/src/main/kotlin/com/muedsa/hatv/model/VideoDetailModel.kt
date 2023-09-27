@@ -6,6 +6,7 @@ data class VideoDetailModel (
     val title: String,
     val author: String?,
     val desc: String?,
+    val tags: List<String>,
     val playUrl: String,
     val videoList: List<VideoInfoModel>
 )

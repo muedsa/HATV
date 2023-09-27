@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,7 +32,6 @@ import com.muedsa.compose.tv.widget.ImageCardsRow
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.compose.tv.widget.StandardImageCardsRow
-import com.muedsa.hatv.model.LazyData
 import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.model.VideoInfoModel
 import com.muedsa.hatv.ui.features.others.EmptyDataScreen
@@ -51,7 +49,7 @@ fun BrowserScreen(
     errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> }
 ) {
-    val videosRowsData by viewModel.videosRowsData.observeAsState(initial = LazyData.init())
+    val videosRowsData by remember { viewModel.videosRowsDataState }
 
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
