@@ -156,6 +156,7 @@ fun VideoDetailScreen(
                                     onClick = {
                                         Timber.d("click tag: $it")
                                         // to search screen
+                                        searchViewModel.resetSearch()
                                         searchViewModel.addSearchTag(it)
                                         searchViewModel.fetchSearchVideos()
                                         onNavigate(NavigationItems.Home, listOf("1"))
