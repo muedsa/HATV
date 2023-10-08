@@ -67,19 +67,19 @@ fun HomeNavTab(
                 .padding(top = 24.dp, bottom = 24.dp)
                 .focusRestorer(),
             selectedTabIndex = selectedTabIndex,
-            indicator = { tabPositions, isActivated ->
+            indicator = { tabPositions, doesTabRowHaveFocus ->
                 // FocusedTab's indicator
                 TabRowDefaults.PillIndicator(
                     currentTabPosition = tabPositions[focusedTabIndex],
+                    doesTabRowHaveFocus = doesTabRowHaveFocus,
                     activeColor = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.4f),
-                    inactiveColor = Color.Transparent,
-                    isActivated = isActivated,
+                    inactiveColor = Color.Transparent
                 )
 
                 // SelectedTab's indicator
                 TabRowDefaults.PillIndicator(
                     currentTabPosition = tabPositions[selectedTabIndex],
-                    isActivated = isActivated,
+                    doesTabRowHaveFocus = doesTabRowHaveFocus
                 )
             }
         ) {
