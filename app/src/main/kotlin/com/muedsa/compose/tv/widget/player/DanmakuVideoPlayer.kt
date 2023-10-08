@@ -38,10 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
@@ -62,6 +62,8 @@ import com.muedsa.compose.tv.widget.OutlinedIconBox
 import com.muedsa.hatv.BuildConfig
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @SuppressLint("OpaqueUnitKey")
 @OptIn(UnstableApi::class)
@@ -304,13 +306,13 @@ fun PlayerControl(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    OutlinedIconBox(modifier = Modifier.scale(if (leftArrowBtnPressed) 1.1f else 1f)) {
+                    OutlinedIconBox(scaleUp = leftArrowBtnPressed) {
                         Icon(Icons.Outlined.ArrowBack, contentDescription = "后退")
                     }
                     Spacer(modifier = Modifier.width(20.dp))
                     OutlinedIconBox(
-                        modifier = Modifier.scale(if (playBtnPressed) 1.1f else 1f),
-                        active = true
+                        scaleUp = playBtnPressed,
+                        inverse = true
                     ) {
                         if (player.isPlaying) {
                             Icon(
@@ -322,7 +324,7 @@ fun PlayerControl(
                         }
                     }
                     Spacer(modifier = Modifier.width(20.dp))
-                    OutlinedIconBox(modifier = Modifier.scale(if (rightArrowBtnPressed) 1.1f else 1f)) {
+                    OutlinedIconBox(scaleUp = rightArrowBtnPressed) {
                         Icon(Icons.Outlined.ArrowForward, contentDescription = "前进")
                     }
                 }
@@ -336,14 +338,55 @@ fun PlayerControl(
     }
 }
 
+@kotlin.OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun PlayerProgressIndicator(player: Player) {
-    if (player.duration != 0L) {
-        LinearProgressIndicator(
-            progress = player.currentPosition.toFloat() / player.duration,
-            modifier = Modifier.fillMaxWidth()
-        )
+
+    val currentStr = if (player.duration != 0L) {
+        player.currentPosition.toDuration(DurationUnit.MILLISECONDS)
+            .toComponents { hours, minutes, seconds, _ ->
+                String.format(
+                    "%02d:%02d:%02d",
+                    hours,
+                    minutes,
+                    seconds,
+                )
+            }
     } else {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        "--:--:--"
     }
+    val totalStr = if (player.duration != 0L) {
+        player.currentPosition.toDuration(DurationUnit.MILLISECONDS)
+            .toComponents { hours, minutes, seconds, _ ->
+                String.format(
+                    "%02d:%02d:%02d",
+                    hours,
+                    minutes,
+                    seconds,
+                )
+            }
+    } else {
+        "--:--:--"
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        if (player.duration != 0L) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                progress = player.currentPosition.toFloat() / player.duration,
+            )
+        } else {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = "$currentStr / $totalStr",
+            textAlign = TextAlign.Right,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1
+        )
+    }
+
 }
