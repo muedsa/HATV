@@ -39,8 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
@@ -55,7 +53,6 @@ import androidx.media3.ui.PlayerView
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.OutlinedIconButton
 import androidx.tv.material3.Text
 import com.kuaishou.akdanmaku.DanmakuConfig
 import com.kuaishou.akdanmaku.render.SimpleRenderer
@@ -208,9 +205,9 @@ fun PlayerControl(
     modifier: Modifier = Modifier,
     state: MutableState<Int> = remember { mutableIntStateOf(0) },
 ) {
-    val playButtonFocusRequester = remember { FocusRequester() }
     var leftArrowBtnPressed by remember { mutableStateOf(false) }
     var rightArrowBtnPressed by remember { mutableStateOf(false) }
+    var playBtnPressed by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = Unit) {
         while (true) {
@@ -253,6 +250,35 @@ fun PlayerControl(
                     rightArrowBtnPressed = false
                     player.seekForward()
                 }
+            } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                    playBtnPressed = true
+                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                    playBtnPressed = false
+                    if (player.isPlaying) {
+                        player.pause()
+                    } else {
+                        player.play()
+                    }
+                }
+            } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY) {
+                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                    playBtnPressed = true
+                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                    playBtnPressed = false
+                    if (!player.isPlaying) {
+                        player.play()
+                    }
+                }
+            } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
+                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                    playBtnPressed = true
+                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                    playBtnPressed = false
+                    if (player.isPlaying) {
+                        player.pause()
+                    }
+                }
             }
             return@onPreviewKeyEvent false
         }
@@ -282,15 +308,9 @@ fun PlayerControl(
                         Icon(Icons.Outlined.ArrowBack, contentDescription = "后退")
                     }
                     Spacer(modifier = Modifier.width(20.dp))
-                    OutlinedIconButton(
-                        modifier = Modifier.focusRequester(playButtonFocusRequester),
-                        onClick = {
-                            if (player.isPlaying) {
-                                player.pause()
-                            } else {
-                                player.play()
-                            }
-                        }
+                    OutlinedIconBox(
+                        modifier = Modifier.scale(if (playBtnPressed) 1.1f else 1f),
+                        active = true
                     ) {
                         if (player.isPlaying) {
                             Icon(
@@ -311,10 +331,6 @@ fun PlayerControl(
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(text = "show: $state", color = Color.Red)
                 }
-            }
-
-            LaunchedEffect(key1 = Unit) {
-                playButtonFocusRequester.requestFocus()
             }
         }
     }
