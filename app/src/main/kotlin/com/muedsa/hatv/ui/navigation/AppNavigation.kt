@@ -9,9 +9,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
+import com.muedsa.compose.tv.widget.NotFoundScreen
 import com.muedsa.hatv.ui.features.detail.VideoDetailScreen
 import com.muedsa.hatv.ui.features.home.HomeScreen
-import com.muedsa.hatv.ui.features.others.NotFoundScreen
 import com.muedsa.hatv.viewmodel.SearchViewModel
 
 @Composable

@@ -41,7 +41,10 @@ import com.muedsa.compose.tv.model.ContentModel
 import com.muedsa.compose.tv.theme.ScreenPaddingLeft
 import com.muedsa.compose.tv.widget.ContentBlock
 import com.muedsa.compose.tv.widget.ContentBlockType
+import com.muedsa.compose.tv.widget.EmptyDataScreen
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
+import com.muedsa.compose.tv.widget.ErrorScreen
+import com.muedsa.compose.tv.widget.LoadingScreen
 import com.muedsa.compose.tv.widget.ScreenBackground
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.compose.tv.widget.StandardImageCardsRow
@@ -49,9 +52,6 @@ import com.muedsa.compose.tv.widget.rememberScreenBackgroundState
 import com.muedsa.hatv.PlaybackActivity
 import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.model.VideoInfoModel
-import com.muedsa.hatv.ui.features.others.EmptyDataScreen
-import com.muedsa.hatv.ui.features.others.ErrorScreen
-import com.muedsa.hatv.ui.features.others.LoadingScreen
 import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.SearchViewModel
 import com.muedsa.hatv.viewmodel.VideoDetailViewModel

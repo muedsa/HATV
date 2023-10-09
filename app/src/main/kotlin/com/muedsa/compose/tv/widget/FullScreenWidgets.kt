@@ -1,4 +1,4 @@
-package com.muedsa.hatv.ui.features.others
+package com.muedsa.compose.tv.widget
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

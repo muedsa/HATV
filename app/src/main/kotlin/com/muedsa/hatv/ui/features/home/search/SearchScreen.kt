@@ -59,12 +59,12 @@ import com.muedsa.compose.tv.theme.ScreenPaddingLeft
 import com.muedsa.compose.tv.theme.VerticalPosterSize
 import com.muedsa.compose.tv.widget.CardType
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
+import com.muedsa.compose.tv.widget.ErrorScreen
 import com.muedsa.compose.tv.widget.ImageContentCard
+import com.muedsa.compose.tv.widget.LoadingScreen
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.hatv.model.LazyType
-import com.muedsa.hatv.ui.features.others.ErrorScreen
-import com.muedsa.hatv.ui.features.others.LoadingScreen
 import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.SearchViewModel
 import timber.log.Timber

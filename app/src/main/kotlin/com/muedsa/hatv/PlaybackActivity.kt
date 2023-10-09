@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import com.muedsa.compose.tv.theme.TvTheme
-import com.muedsa.hatv.ui.features.others.FillTextScreen
+import com.muedsa.compose.tv.widget.FillTextScreen
 import com.muedsa.hatv.ui.features.playback.PlaybackScreen
 import dagger.hilt.android.AndroidEntryPoint
 

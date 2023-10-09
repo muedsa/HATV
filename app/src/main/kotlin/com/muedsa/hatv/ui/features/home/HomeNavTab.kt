@@ -24,11 +24,11 @@ import androidx.tv.material3.TabRow
 import androidx.tv.material3.TabRowDefaults
 import androidx.tv.material3.Text
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
+import com.muedsa.compose.tv.widget.NotFoundScreen
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.hatv.ui.features.home.browser.BrowserScreen
 import com.muedsa.hatv.ui.features.home.search.SearchScreen
-import com.muedsa.hatv.ui.features.others.NotFoundScreen
 import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.HomePageViewModel
 import com.muedsa.hatv.viewmodel.SearchViewModel
