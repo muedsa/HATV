@@ -59,7 +59,6 @@ import com.kuaishou.akdanmaku.render.SimpleRenderer
 import com.kuaishou.akdanmaku.ui.DanmakuPlayer
 import com.kuaishou.akdanmaku.ui.DanmakuView
 import com.muedsa.compose.tv.widget.OutlinedIconBox
-import com.muedsa.hatv.BuildConfig
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
@@ -148,7 +147,7 @@ fun DanmakuVideoPlayer(
         }
     }
 
-    PlayerControl(player = exoPlayer, state = playerControlTicker)
+    PlayerControl(debug = debug, player = exoPlayer, state = playerControlTicker)
 }
 
 @SuppressLint("OpaqueUnitKey")
@@ -196,15 +195,16 @@ fun SimpleVideoPlayer(
         }
     }
 
-    PlayerControl(player = exoPlayer, state = playerControlTicker)
+    PlayerControl(debug = debug, player = exoPlayer, state = playerControlTicker)
 }
 
 @kotlin.OptIn(ExperimentalTvMaterial3Api::class)
 @OptIn(UnstableApi::class)
 @Composable
 fun PlayerControl(
-    player: Player,
     modifier: Modifier = Modifier,
+    debug: Boolean = false,
+    player: Player,
     state: MutableState<Int> = remember { mutableIntStateOf(0) },
 ) {
     var leftArrowBtnPressed by remember { mutableStateOf(false) }
@@ -329,7 +329,7 @@ fun PlayerControl(
                     }
                 }
 
-                if (BuildConfig.DEBUG) {
+                if (debug) {
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(text = "show: $state", color = Color.Red)
                 }
