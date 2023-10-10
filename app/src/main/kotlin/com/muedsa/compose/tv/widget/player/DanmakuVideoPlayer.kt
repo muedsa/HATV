@@ -342,7 +342,7 @@ fun PlayerControl(
 @Composable
 fun PlayerProgressIndicator(player: Player) {
 
-    val currentStr = if (player.duration != 0L) {
+    val currentStr = if (player.duration > 0L) {
         player.currentPosition.toDuration(DurationUnit.MILLISECONDS)
             .toComponents { hours, minutes, seconds, _ ->
                 String.format(
@@ -355,8 +355,8 @@ fun PlayerProgressIndicator(player: Player) {
     } else {
         "--:--:--"
     }
-    val totalStr = if (player.duration != 0L) {
-        player.currentPosition.toDuration(DurationUnit.MILLISECONDS)
+    val totalStr = if (player.duration > 0L) {
+        player.duration.toDuration(DurationUnit.MILLISECONDS)
             .toComponents { hours, minutes, seconds, _ ->
                 String.format(
                     "%02d:%02d:%02d",
@@ -371,7 +371,7 @@ fun PlayerProgressIndicator(player: Player) {
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        if (player.duration != 0L) {
+        if (player.duration > 0L) {
             LinearProgressIndicator(
                 modifier = Modifier.fillMaxWidth(),
                 progress = player.currentPosition.toFloat() / player.duration,
