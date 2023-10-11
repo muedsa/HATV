@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         splashScreen.setKeepOnScreenCondition {
             homePageViewModel.videosRowsDataState.value.type == LazyType.LOADING
-                    && searchViewModel.searchOptionsState.value.type == LazyType.LOADING
+                    || searchViewModel.searchOptionsState.value.type == LazyType.LOADING
         }
         setContent {
 
