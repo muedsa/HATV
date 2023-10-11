@@ -15,7 +15,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class HomePageViewModel @Inject internal constructor(
+class HomePageViewModel @Inject constructor(
     private val repo: IHARepository
 ) : ViewModel() {
 

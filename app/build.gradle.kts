@@ -119,8 +119,6 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.runtime)
-    implementation(libs.runtime.livedata)
-    implementation(libs.runtime.rxjava3)
     implementation(libs.ui)
     implementation(libs.ui)
     implementation(libs.ui)
@@ -154,9 +152,6 @@ dependencies {
     implementation(libs.media3.hls)
 
     implementation(libs.akdanmaku)
-
-    implementation(libs.rxjava3)
-    implementation(libs.rxjava3.android)
 
     implementation(libs.jsoup)
 
