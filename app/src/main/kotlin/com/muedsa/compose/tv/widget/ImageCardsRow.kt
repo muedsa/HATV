@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -103,6 +104,10 @@ fun <T> ImageCardsRow(
             }
         }
     }
+
+    LaunchedEffect(key1 = Unit) {
+        state.scrollToItem(state.firstVisibleItemIndex)
+    }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -180,6 +185,10 @@ fun <T> StandardImageCardsRow(
                 }
             }
         }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        state.scrollToItem(state.firstVisibleItemIndex)
     }
 }
 
