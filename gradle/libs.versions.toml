@@ -28,7 +28,7 @@ mockito = "5.5.0"
 mockito-kotlin = "5.1.0"
 google-services = "4.4.0"
 firebase-crashlytics-gradle-plugin = "2.9.9"
-firebase-bom = "32.4.0"
+firebase-bom = "32.4.1"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
