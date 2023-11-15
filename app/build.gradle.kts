@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.muedsa.hatv"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "0.0.1-alpha01"
