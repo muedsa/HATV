@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
@@ -34,7 +35,7 @@ class PlaybackActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     shape = RectangleShape,
                     colors = NonInteractiveSurfaceDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.background,
+                        containerColor = Color.Black,
                         contentColor = MaterialTheme.colorScheme.onBackground
                     )
                 ) {
