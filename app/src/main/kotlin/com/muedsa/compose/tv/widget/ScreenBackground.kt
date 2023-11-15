@@ -29,9 +29,9 @@ import androidx.tv.material3.MaterialTheme
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.muedsa.compose.tv.theme.TvTheme
+import com.muedsa.uitl.LogUtil
 import jp.wasabeef.transformers.coil.BlurTransformation
 import kotlinx.coroutines.delay
-import timber.log.Timber
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -85,7 +85,7 @@ fun ScreenBackground(
             .data(delayState.url)
             .crossfade(true)
             .listener(onError = { _, result ->
-                Timber.d(result.throwable, "loading image error")
+                LogUtil.d(result.throwable, "loading image error")
             })
             .also {
                 if (delayState.type == ScreenBackgroundType.BLUR) {
@@ -170,12 +170,12 @@ class ScreenBackgroundState(
             restore = {
                 @Suppress("UNCHECKED_CAST")
                 (ScreenBackgroundState(
-        initUrl = it[SAVER_KEY_URL] as String?,
-        initType = it[SAVER_KEY_TYPE] as ScreenBackgroundType,
-        initHeaders = it.filterKeys { key ->
-            SAVER_KEY_URL != key && SAVER_KEY_TYPE != key
-        } as Map<String, String>
-    ))
+                    initUrl = it[SAVER_KEY_URL] as String?,
+                    initType = it[SAVER_KEY_TYPE] as ScreenBackgroundType,
+                    initHeaders = it.filterKeys { key ->
+                        SAVER_KEY_URL != key && SAVER_KEY_TYPE != key
+                    } as Map<String, String>
+                ))
             }
         )
     }

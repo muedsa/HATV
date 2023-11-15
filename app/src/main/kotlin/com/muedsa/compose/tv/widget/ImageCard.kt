@@ -1,5 +1,6 @@
 package com.muedsa.compose.tv.widget
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -28,13 +30,14 @@ import com.muedsa.compose.tv.theme.CardContentPadding
 import com.muedsa.compose.tv.theme.HorizontalPosterSize
 import com.muedsa.compose.tv.theme.TvTheme
 import com.muedsa.compose.tv.theme.VerticalPosterSize
-import timber.log.Timber
+import com.muedsa.uitl.LogUtil
 
 @Composable
 fun ImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
     imageSize: DpSize,
+    backgroundColor: Color = Color.Unspecified,
     type: CardType = CardType.STANDARD,
     model: ContentModel? = null,
     onItemFocus: () -> Unit = {},
@@ -46,6 +49,7 @@ fun ImageContentCard(
             modifier = modifier,
             url = url,
             imageSize = imageSize,
+            backgroundColor = backgroundColor,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
         )
@@ -54,6 +58,7 @@ fun ImageContentCard(
             modifier = modifier,
             url = url,
             imageSize = imageSize,
+            backgroundColor = backgroundColor,
             model = model,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
@@ -63,6 +68,7 @@ fun ImageContentCard(
             modifier = modifier,
             url = url,
             imageSize = imageSize,
+            backgroundColor = backgroundColor,
             model = model,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
@@ -72,6 +78,7 @@ fun ImageContentCard(
             modifier = modifier,
             url = url,
             imageSize = imageSize,
+            backgroundColor = backgroundColor,
             model = model,
             onItemFocus = onItemFocus,
             onItemClick = onItemClick
@@ -91,6 +98,7 @@ fun ImageCard(
     modifier: Modifier = Modifier,
     url: String,
     imageSize: DpSize,
+    backgroundColor: Color = Color.Unspecified,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
     content: @Composable () -> Unit = {}
@@ -106,12 +114,14 @@ fun ImageCard(
     ) {
         Box {
             SubcomposeAsyncImage(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor),
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(url)
                     .crossfade(true)
                     .listener(onError = { _, result ->
-                        Timber.d(result.throwable, "loading image error")
+                        LogUtil.d(result.throwable, "loading image error")
                     })
                     .build(),
                 contentDescription = null,
@@ -127,6 +137,7 @@ fun StandardImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
     imageSize: DpSize,
+    backgroundColor: Color = Color.Unspecified,
     model: ContentModel,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
@@ -136,6 +147,7 @@ fun StandardImageContentCard(
             modifier = Modifier.width(imageSize.width),
             url,
             imageSize,
+            backgroundColor,
             onItemFocus,
             onItemClick
         )
@@ -162,11 +174,12 @@ fun CompactImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
     imageSize: DpSize,
+    backgroundColor: Color = Color.Unspecified,
     model: ContentModel,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
 ) {
-    ImageCard(modifier, url, imageSize, onItemFocus, onItemClick) {
+    ImageCard(modifier, url, imageSize, backgroundColor, onItemFocus, onItemClick) {
         ContentBlock(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
@@ -186,12 +199,13 @@ fun WideStandardImageContentCard(
     modifier: Modifier = Modifier,
     url: String,
     imageSize: DpSize,
+    backgroundColor: Color = Color.Unspecified,
     model: ContentModel,
     onItemFocus: () -> Unit = {},
     onItemClick: () -> Unit = {},
 ) {
     Row(modifier) {
-        ImageCard(Modifier, url, imageSize, onItemFocus, onItemClick)
+        ImageCard(Modifier, url, imageSize, backgroundColor, onItemFocus, onItemClick)
         ContentBlock(
             modifier = Modifier
                 .size(imageSize)

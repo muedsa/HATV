@@ -4,7 +4,8 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
-    kotlin("kapt")
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hiltAndroid)
     alias(libs.plugins.gmsGoogleService)
     alias(libs.plugins.firebaseCrashlytics)
@@ -26,7 +27,7 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "0.0.1-alpha01"
-
+        setProperty("archivesBaseName", "HATV-$versionName")
     }
 
     signingConfigs {
@@ -94,7 +95,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
 
     packaging {
@@ -113,9 +114,10 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.core.splashscreen)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.runtime)
@@ -155,14 +157,15 @@ dependencies {
 
     implementation(libs.jsoup)
 
+    implementation(libs.ktx.serialization)
+    implementation(libs.retrofit2)
+    implementation(libs.retrofit2.ktx.serialization)
+    implementation(libs.okhttp3.logging)
+
     testImplementation(libs.junit4)
     testImplementation(libs.robolectric)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
-}
-
-kapt {
-    correctErrorTypes = true
 }

@@ -1,9 +1,9 @@
 package com.muedsa.hatv.repository
 
-import com.muedsa.hatv.model.PagedVideoInfoModel
-import com.muedsa.hatv.model.SearchOptionsModel
-import com.muedsa.hatv.model.VideoDetailModel
-import com.muedsa.hatv.model.VideosRowModel
+import com.muedsa.hatv.model.ha.PagedVideoInfoModel
+import com.muedsa.hatv.model.ha.SearchOptionsModel
+import com.muedsa.hatv.model.ha.VideoDetailModel
+import com.muedsa.hatv.model.ha.VideosRowModel
 
 interface IHARepository {
 
@@ -16,7 +16,7 @@ interface IHARepository {
     fun fetchSearchVideos(
         query: String,
         genre: String = "",
-        tags: List<String> = emptyList(),
+        tags: Set<String> = emptySet(),
         page: Int = 1
     ): PagedVideoInfoModel
 }

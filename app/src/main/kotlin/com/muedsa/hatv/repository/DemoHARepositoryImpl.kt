@@ -1,11 +1,11 @@
 package com.muedsa.hatv.repository
 
-import com.muedsa.hatv.model.PagedVideoInfoModel
-import com.muedsa.hatv.model.SearchOptionsModel
-import com.muedsa.hatv.model.SearchTagsRowModel
-import com.muedsa.hatv.model.VideoDetailModel
-import com.muedsa.hatv.model.VideoInfoModel
-import com.muedsa.hatv.model.VideosRowModel
+import com.muedsa.hatv.model.ha.PagedVideoInfoModel
+import com.muedsa.hatv.model.ha.SearchOptionsModel
+import com.muedsa.hatv.model.ha.SearchTagsRowModel
+import com.muedsa.hatv.model.ha.VideoDetailModel
+import com.muedsa.hatv.model.ha.VideoInfoModel
+import com.muedsa.hatv.model.ha.VideosRowModel
 import java.util.Random
 
 class DemoHARepositoryImpl : IHARepository {
@@ -109,7 +109,7 @@ class DemoHARepositoryImpl : IHARepository {
     override fun fetchSearchVideos(
         query: String,
         genre: String,
-        tags: List<String>,
+        tags: Set<String>,
         page: Int
     ): PagedVideoInfoModel {
         mockWaitNetwork()

@@ -1,4 +1,4 @@
-package com.muedsa.hatv.model
+package com.muedsa.hatv.model.ha
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

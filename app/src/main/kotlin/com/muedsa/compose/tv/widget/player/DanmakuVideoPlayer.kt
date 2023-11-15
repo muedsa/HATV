@@ -1,6 +1,7 @@
 package com.muedsa.compose.tv.widget.player
 
 import android.annotation.SuppressLint
+import android.icu.text.SimpleDateFormat
 import android.view.Gravity
 import android.view.KeyEvent
 import android.widget.FrameLayout
@@ -44,7 +45,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
@@ -60,6 +64,7 @@ import com.kuaishou.akdanmaku.ui.DanmakuPlayer
 import com.kuaishou.akdanmaku.ui.DanmakuView
 import com.muedsa.compose.tv.widget.OutlinedIconBox
 import kotlinx.coroutines.delay
+import java.util.Date
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -69,8 +74,10 @@ import kotlin.time.toDuration
 @Composable
 fun DanmakuVideoPlayer(
     debug: Boolean = false,
+    danmakuConfigSetting: DanmakuConfig.() -> Unit = {},
+    danmakuPlayerInit: DanmakuPlayer.() -> Unit = {},
+    videoPlayerBuilderSetting: ExoPlayer.Builder.() -> Unit = {},
     videoPlayerInit: ExoPlayer.() -> Unit,
-    danmakuPlayerInit: DanmakuPlayer.() -> Unit
 ) {
 
     val context = LocalContext.current
@@ -78,9 +85,7 @@ fun DanmakuVideoPlayer(
     val playerControlTicker = remember { mutableIntStateOf(0) }
 
     val danmakuConfig = remember {
-        DanmakuConfig().apply {
-            textSizeScale = 1.4f
-        }
+        DanmakuConfig().apply(danmakuConfigSetting)
     }
 
     val danmakuPlayer = remember {
@@ -89,6 +94,7 @@ fun DanmakuVideoPlayer(
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context)
+            .also(videoPlayerBuilderSetting)
             .build()
             .also {
                 if (debug) {
@@ -155,19 +161,22 @@ fun DanmakuVideoPlayer(
 @Composable
 fun SimpleVideoPlayer(
     debug: Boolean = false,
-    init: ExoPlayer.() -> Unit
+    playerBuilderSetting: ExoPlayer.Builder.() -> Unit = {},
+    playerInit: ExoPlayer.() -> Unit
 ) {
     val context = LocalContext.current
 
     val playerControlTicker = remember { mutableIntStateOf(0) }
 
     val exoPlayer = remember {
-        ExoPlayer.Builder(context).build()
+        ExoPlayer.Builder(context)
+            .also(playerBuilderSetting)
+            .build()
             .also {
                 if (debug) {
                     it.addAnalyticsListener(EventLogger())
                 }
-                it.init()
+                it.playerInit()
             }
     }
 
@@ -202,7 +211,6 @@ fun SimpleVideoPlayer(
 @OptIn(UnstableApi::class)
 @Composable
 fun PlayerControl(
-    modifier: Modifier = Modifier,
     debug: Boolean = false,
     player: Player,
     state: MutableState<Int> = remember { mutableIntStateOf(0) },
@@ -210,6 +218,7 @@ fun PlayerControl(
     var leftArrowBtnPressed by remember { mutableStateOf(false) }
     var rightArrowBtnPressed by remember { mutableStateOf(false) }
     var playBtnPressed by remember { mutableStateOf(false) }
+    var videoInfo by remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = Unit) {
         while (true) {
@@ -220,73 +229,78 @@ fun PlayerControl(
         }
     }
 
-    Box(modifier = modifier
-        .focusable()
-        .onPreviewKeyEvent {
-            if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_UP
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_DOWN
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MENU
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY
-                    || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE
-                ) {
-                    state.value = 5
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .focusable()
+            .onPreviewKeyEvent {
+                if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                    if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_UP
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_DOWN
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MENU
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY
+                        || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE
+                    ) {
+                        state.value = 5
+                    }
                 }
+                if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                    if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                        leftArrowBtnPressed = true
+                    } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                        leftArrowBtnPressed = false
+                        player.seekBack()
+                    }
+                } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                        rightArrowBtnPressed = true
+                    } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                        rightArrowBtnPressed = false
+                        player.seekForward()
+                    }
+                } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+                    if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                        playBtnPressed = true
+                    } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                        playBtnPressed = false
+                        if (player.isPlaying) {
+                            player.pause()
+                        } else {
+                            player.play()
+                        }
+                    }
+                } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY) {
+                    if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                        playBtnPressed = true
+                    } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                        playBtnPressed = false
+                        if (!player.isPlaying) {
+                            player.play()
+                        }
+                    }
+                } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
+                    if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                        playBtnPressed = true
+                    } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
+                        playBtnPressed = false
+                        if (player.isPlaying) {
+                            player.pause()
+                        }
+                    }
+                }
+                return@onPreviewKeyEvent false
             }
-            if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
-                    leftArrowBtnPressed = true
-                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                    leftArrowBtnPressed = false
-                    player.seekBack()
-                }
-            } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
-                    rightArrowBtnPressed = true
-                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                    rightArrowBtnPressed = false
-                    player.seekForward()
-                }
-            } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
-                    playBtnPressed = true
-                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                    playBtnPressed = false
-                    if (player.isPlaying) {
-                        player.pause()
-                    } else {
-                        player.play()
-                    }
-                }
-            } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY) {
-                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
-                    playBtnPressed = true
-                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                    playBtnPressed = false
-                    if (!player.isPlaying) {
-                        player.play()
-                    }
-                }
-            } else if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
-                if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
-                    playBtnPressed = true
-                } else if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
-                    playBtnPressed = false
-                    if (player.isPlaying) {
-                        player.pause()
-                    }
-                }
-            }
-            return@onPreviewKeyEvent false
-        }
-        .fillMaxSize()
     ) {
+
         AnimatedVisibility(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f)),
             visible = state.value > 0,
             enter = fadeIn(),
             exit = fadeOut()
@@ -294,7 +308,22 @@ fun PlayerControl(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
+                    .padding(40.dp)
+            ) {
+                Text(
+                    text = "视频信息",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = videoInfo,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(20.dp),
                 verticalArrangement = Arrangement.Bottom,
             ) {
@@ -336,12 +365,36 @@ fun PlayerControl(
             }
         }
     }
+
+    LaunchedEffect(key1 = player) {
+        player.addListener(object : Player.Listener {
+            override fun onTracksChanged(tracks: Tracks) {
+                var newVideoInfo = ""
+                for (trackGroup in tracks.groups) {
+                    if (trackGroup.isSelected) {
+                        var groupInfo = "group [ type=${groupTypeToString(trackGroup)}\n"
+                        for (i in 0 until trackGroup.length) {
+                            val isSelected = trackGroup.isTrackSelected(i)
+                            if (isSelected) {
+                                val trackFormat = trackGroup.getTrackFormat(i)
+                                groupInfo += "    Track ${Format.toLogString(trackFormat)}\n"
+                            }
+                        }
+                        groupInfo += "]\n"
+                        newVideoInfo += groupInfo
+                    }
+                }
+                videoInfo = newVideoInfo
+            }
+        })
+    }
 }
 
 @kotlin.OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun PlayerProgressIndicator(player: Player) {
-
+    val dateTimeFormat = remember { SimpleDateFormat.getDateTimeInstance() }
+    val systemStr = dateTimeFormat.format(Date())
     val currentStr = if (player.duration > 0L) {
         player.currentPosition.toDuration(DurationUnit.MILLISECONDS)
             .toComponents { hours, minutes, seconds, _ ->
@@ -382,11 +435,26 @@ fun PlayerProgressIndicator(player: Player) {
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = "$currentStr / $totalStr",
+            text = "$systemStr    $currentStr / $totalStr",
             textAlign = TextAlign.Right,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1
         )
     }
 
+}
+
+fun groupTypeToString(group: Tracks.Group): String {
+    return when (group.type) {
+        C.TRACK_TYPE_NONE -> "NONE"
+        C.TRACK_TYPE_UNKNOWN -> "UNKNOWN"
+        C.TRACK_TYPE_DEFAULT -> "DEFAULT"
+        C.TRACK_TYPE_AUDIO -> "AUDIO"
+        C.TRACK_TYPE_VIDEO -> "VIDEO"
+        C.TRACK_TYPE_TEXT -> "TEXT"
+        C.TRACK_TYPE_IMAGE -> "IMAGE"
+        C.TRACK_TYPE_METADATA -> "METADATA"
+        C.TRACK_TYPE_CAMERA_MOTION -> "CAMERA_MOTION"
+        else -> "OTHER"
+    }
 }

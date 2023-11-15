@@ -1,7 +1,7 @@
 package com.muedsa.hatv.test
 
 import android.net.Uri
-import com.muedsa.hatv.model.VideosRowModel
+import com.muedsa.hatv.model.ha.VideosRowModel
 import com.muedsa.hatv.repository.HAUrls
 import com.muedsa.hatv.util.parseHomePageBody
 import com.muedsa.hatv.util.parsePagedVideosFromSearchPage
@@ -107,7 +107,7 @@ class HAJsoupUtilTest {
             println(it)
             assert(it.tags.isNotEmpty())
             it.tags.forEach { tag ->
-                assert(tag.tag.isNotEmpty())
+                assert(tag.isNotEmpty())
             }
             println("-------")
         }

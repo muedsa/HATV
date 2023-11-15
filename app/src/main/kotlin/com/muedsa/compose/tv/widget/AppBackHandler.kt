@@ -11,12 +11,12 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 
 @Composable
-fun AppCloseHandler(
+fun AppBackHandler(
     onAllowBack: () -> Unit = {}
 ) {
 
     var allowBack by remember { mutableStateOf(false) }
-    var tick by remember { mutableIntStateOf(8) }
+    var tick by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(key1 = tick) {
         delay(250)

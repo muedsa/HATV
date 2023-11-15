@@ -1,17 +1,17 @@
 package com.muedsa.hatv.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.hatv.model.LazyData
-import com.muedsa.hatv.model.VideosRowModel
+import com.muedsa.hatv.model.ha.VideosRowModel
 import com.muedsa.hatv.repository.IHARepository
+import com.muedsa.uitl.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,30 +19,30 @@ class HomePageViewModel @Inject constructor(
     private val repo: IHARepository
 ) : ViewModel() {
 
-    val videosRowsDataState = mutableStateOf<LazyData<List<VideosRowModel>>>(LazyData.init())
+    private val _videosRowsLDSF = MutableStateFlow<LazyData<List<VideosRowModel>>>(LazyData.init())
+    val videosRowsLDSF: StateFlow<LazyData<List<VideosRowModel>>> = _videosRowsLDSF
 
-    fun fetchHomeVideosRows() {
-        videosRowsDataState.value = LazyData.init()
-        viewModelScope.launch(context = Dispatchers.IO) {
-            try {
-                repo.fetchHomeVideosRows().let {
-                    videosRowsDataState.value = LazyData.success(it)
-                }
-            } catch (t: Throwable) {
-                Timber.d(t)
-                withContext(Dispatchers.Main) {
-                    videosRowsDataState.value = LazyData.fail(t)
-                }
-                FirebaseCrashlytics.getInstance().recordException(t)
+    fun refreshHomeVideosRows() {
+        viewModelScope.launch {
+            _videosRowsLDSF.value = LazyData.init()
+            _videosRowsLDSF.value = withContext(Dispatchers.IO) {
+                fetchHomeVideosRows()
             }
         }
     }
 
-    init {
-        Timber.d("HomePageViewModel init")
-        viewModelScope.launch {
-            Timber.d("HomePageViewModel init viewModelScope launch")
-            fetchHomeVideosRows()
+    private fun fetchHomeVideosRows(): LazyData<List<VideosRowModel>> {
+        return try {
+            repo.fetchHomeVideosRows().let {
+                LazyData.success(it)
+            }
+        } catch (t: Throwable) {
+            LogUtil.fd(t)
+            LazyData.fail(t)
         }
+    }
+
+    init {
+        refreshHomeVideosRows()
     }
 }

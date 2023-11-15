@@ -1,4 +1,4 @@
-package com.muedsa.hatv.model
+package com.muedsa.hatv.model.ha
 
 import com.muedsa.compose.tv.model.KeyModel
 

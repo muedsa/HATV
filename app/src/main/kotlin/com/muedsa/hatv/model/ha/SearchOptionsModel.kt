@@ -1,4 +1,4 @@
-package com.muedsa.hatv.model
+package com.muedsa.hatv.model.ha
 
 data class SearchOptionsModel(
     val genres: List<String>,

@@ -28,17 +28,20 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
-import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.grid.itemsIndexed
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.ButtonDefaults
@@ -64,10 +67,12 @@ import com.muedsa.compose.tv.widget.ImageContentCard
 import com.muedsa.compose.tv.widget.LoadingScreen
 import com.muedsa.compose.tv.widget.ScreenBackgroundState
 import com.muedsa.compose.tv.widget.ScreenBackgroundType
+import com.muedsa.hatv.model.LazyPagedList
 import com.muedsa.hatv.model.LazyType
 import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.SearchViewModel
-import timber.log.Timber
+import com.muedsa.uitl.LogUtil
+import kotlinx.coroutines.flow.update
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -77,33 +82,26 @@ fun SearchScreen(
     errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> }
 ) {
+    val searchOptionsLD by viewModel.searchOptionsLDSF.collectAsState()
 
-    val searchOptionsData by remember { viewModel.searchOptionsState }
+    val selectedSearchOptions by viewModel.selectedSearchOptionsSF.collectAsState()
 
-    var searchText by remember { viewModel.searchTextState }
-    var searchGenre by remember { viewModel.searchGenreState }
-    val searchTags = remember { viewModel.searchTagsState }
-
-    val searchLoad by remember { viewModel.searchLoadState }
-
-    val isHorizontal by remember { viewModel.horizontalCardState }
-    val searchVideos = remember { viewModel.searchVideosState }
-    val searchPage by remember { viewModel.pageState }
-    val searchMaxPage by remember { viewModel.maxPageState }
+    val searchVideosLP by viewModel.searchVideosLPSF.collectAsState()
+    val searchVideosIsHorizontal by viewModel.searchVideosIsHorizontalSF.collectAsState()
 
     var searchOptionsExpand by remember {
         mutableStateOf(false)
     }
 
-    LaunchedEffect(key1 = searchOptionsData.type, key2 = searchOptionsData.error) {
-        if (searchOptionsData.type == LazyType.FAILURE) {
-            errorMsgBoxState.error(searchOptionsData.error)
+    LaunchedEffect(key1 = searchOptionsLD.type, key2 = searchOptionsLD.error) {
+        if (searchOptionsLD.type == LazyType.FAILURE) {
+            errorMsgBoxState.error(searchOptionsLD.error)
         }
     }
 
-    LaunchedEffect(key1 = searchLoad.type, key2 = searchLoad.error) {
-        if (searchLoad.type == LazyType.FAILURE) {
-            errorMsgBoxState.error(searchLoad.error)
+    LaunchedEffect(key1 = searchVideosLP.type, key2 = searchVideosLP.error) {
+        if (searchVideosLP.type == LazyType.FAILURE) {
+            errorMsgBoxState.error(searchVideosLP.error)
         }
     }
 
@@ -111,13 +109,12 @@ fun SearchScreen(
         searchOptionsExpand = false
     }
 
-    when (searchOptionsData.type) {
+    when (searchOptionsLD.type) {
         LazyType.LOADING -> {
             LoadingScreen()
         }
 
         LazyType.SUCCESS -> {
-
             Column(modifier = Modifier.padding(start = ScreenPaddingLeft)) {
                 Row(
                     modifier = Modifier
@@ -141,16 +138,17 @@ fun SearchScreen(
                             focusedTextColor = MaterialTheme.colorScheme.onSurface,
                             unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         ),
-                        value = searchText,
+                        value = selectedSearchOptions.query,
                         onValueChange = {
-                            searchText = it
+                            viewModel.selectedSearchOptionsSF.value =
+                                selectedSearchOptions.copy(query = it)
                         },
                         singleLine = true
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     OutlinedIconButton(onClick = {
                         searchOptionsExpand = false
-                        viewModel.fetchSearchVideos()
+                        viewModel.searchVideos(LazyPagedList.new(selectedSearchOptions))
                     }) {
                         Icon(
                             modifier = Modifier.size(ButtonDefaults.IconSize),
@@ -183,12 +181,12 @@ fun SearchScreen(
                 }
 
                 if (searchOptionsExpand) {
-                    if (searchOptionsData.data != null
-                        && (searchOptionsData.data!!.genres.isNotEmpty() || searchOptionsData.data!!.tagsRows.isNotEmpty())
+                    if (searchOptionsLD.data != null
+                        && (searchOptionsLD.data!!.genres.isNotEmpty() || searchOptionsLD.data!!.tagsRows.isNotEmpty())
                     ) {
-                        val searchOptions = searchOptionsData.data!!
+                        val searchOptions = searchOptionsLD.data!!
                         TvLazyColumn(contentPadding = PaddingValues(top = ImageCardRowCardPadding)) {
-                            if (searchTags.isNotEmpty()) {
+                            if (selectedSearchOptions.tags.isNotEmpty()) {
                                 item {
                                     Text(
                                         text = "选择的标签",
@@ -197,7 +195,7 @@ fun SearchScreen(
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     FlowRow {
-                                        for (tag in searchTags) {
+                                        for (tag in selectedSearchOptions.tags) {
                                             FilterChip(
                                                 modifier = Modifier.padding(8.dp),
                                                 selected = true,
@@ -209,8 +207,18 @@ fun SearchScreen(
                                                     )
                                                 },
                                                 onClick = {
-                                                    Timber.d("click selected tag: $tag")
-                                                    viewModel.removeSearchTag(tag)
+                                                    LogUtil.d("click selected tag: $tag")
+                                                    viewModel.selectedSearchOptionsSF.update {
+                                                        it.copy(
+                                                            tags = buildSet {
+                                                                it.tags.forEach { oldTag ->
+                                                                    if (oldTag != tag) {
+                                                                        add(oldTag)
+                                                                    }
+                                                                }
+                                                            }
+                                                        )
+                                                    }
                                                 }
                                             ) {
                                                 Text(text = tag)
@@ -232,8 +240,8 @@ fun SearchScreen(
                                     for (genre in searchOptions.genres) {
                                         FilterChip(
                                             modifier = Modifier.padding(8.dp),
-                                            selected = genre == searchGenre,
-                                            leadingIcon = if (genre == searchGenre) {
+                                            selected = genre == selectedSearchOptions.genre,
+                                            leadingIcon = if (genre == selectedSearchOptions.genre) {
                                                 {
                                                     Icon(
                                                         modifier = Modifier.size(FilterChipDefaults.IconSize),
@@ -243,9 +251,10 @@ fun SearchScreen(
                                                 }
                                             } else null,
                                             onClick = {
-                                                Timber.d("click Genre: $genre")
-                                                searchGenre =
-                                                    if (genre == searchGenre) "" else genre
+                                                LogUtil.d("click Genre: $genre")
+                                                viewModel.selectedSearchOptionsSF.update {
+                                                    it.copy(genre = if (genre == it.genre) "" else genre)
+                                                }
                                             }
                                         ) {
                                             Text(text = genre)
@@ -266,7 +275,7 @@ fun SearchScreen(
                                 Spacer(modifier = Modifier.height(4.dp))
                                 FlowRow {
                                     for (tag in it.tags) {
-                                        val selected = searchTags.contains(tag)
+                                        val selected = selectedSearchOptions.tags.contains(tag)
                                         FilterChip(
                                             modifier = Modifier.padding(8.dp),
                                             selected = selected,
@@ -280,11 +289,20 @@ fun SearchScreen(
                                                 }
                                             } else null,
                                             onClick = {
-                                                Timber.d("click $tag")
-                                                if (selected) {
-                                                    viewModel.removeSearchTag(tag)
-                                                } else {
-                                                    viewModel.addSearchTag(tag)
+                                                LogUtil.d("click $tag")
+                                                viewModel.selectedSearchOptionsSF.update { old ->
+                                                    old.copy(tags = buildSet {
+                                                        if (selected) {
+                                                            old.tags.forEach { oldTag ->
+                                                                if (oldTag != tag) {
+                                                                    add(oldTag)
+                                                                }
+                                                            }
+                                                        } else {
+                                                            addAll(old.tags)
+                                                            add(tag)
+                                                        }
+                                                    })
                                                 }
                                             }
                                         ) {
@@ -297,40 +315,49 @@ fun SearchScreen(
                         }
                     }
                 } else {
-                    if (searchVideos.isNotEmpty()) {
+                    if (searchVideosLP.list.isNotEmpty()) {
                         TvLazyVerticalGrid(
-                            columns = TvGridCells.Adaptive(if (isHorizontal) HorizontalPosterSize.width else VerticalPosterSize.width + ImageCardRowCardPadding),
+                            columns = TvGridCells.Adaptive(if (searchVideosIsHorizontal) HorizontalPosterSize.width else VerticalPosterSize.width + ImageCardRowCardPadding),
                             contentPadding = PaddingValues(top = ImageCardRowCardPadding)
                         ) {
-                            items(
-                                items = searchVideos,
-                                key = { it.id }
-                            ) {
+                            itemsIndexed(
+                                items = searchVideosLP.list,
+                                key = { _, item -> item.id }
+                            ) { index, item ->
+                                val itemFocusRequester = remember { FocusRequester() }
                                 ImageContentCard(
-                                    modifier = Modifier.padding(end = ImageCardRowCardPadding),
-                                    url = it.image,
-                                    imageSize = if (isHorizontal) HorizontalPosterSize else VerticalPosterSize,
+                                    modifier = Modifier
+                                        .focusRequester(itemFocusRequester)
+                                        .padding(end = ImageCardRowCardPadding),
+                                    url = item.image,
+                                    imageSize = if (searchVideosIsHorizontal) HorizontalPosterSize else VerticalPosterSize,
                                     type = CardType.STANDARD,
-                                    model = ContentModel(it.title, subtitle = it.author),
+                                    model = ContentModel(item.title, subtitle = item.author),
                                     onItemFocus = {
-                                        backgroundState.url = it.image
+                                        backgroundState.url = item.image
                                         backgroundState.type = ScreenBackgroundType.BLUR
                                     },
                                     onItemClick = {
-                                        Timber.d("Click $it")
-                                        onNavigate(NavigationItems.Detail, listOf(it.id))
+                                        LogUtil.d("Click $item")
+                                        onNavigate(NavigationItems.Detail, listOf(item.id))
                                     }
                                 )
+
+                                LaunchedEffect(key1 = Unit) {
+                                    if (searchVideosLP.offset == index) {
+                                        itemFocusRequester.requestFocus()
+                                    }
+                                }
                             }
 
-                            if (searchLoad.type != LazyType.LOADING && searchPage < searchMaxPage) {
+                            if (searchVideosLP.type != LazyType.LOADING && searchVideosLP.hasNext) {
                                 item {
                                     Card(
                                         modifier = Modifier
-                                            .size(if (isHorizontal) HorizontalPosterSize else VerticalPosterSize)
+                                            .size(if (searchVideosIsHorizontal) HorizontalPosterSize else VerticalPosterSize)
                                             .padding(end = ImageCardRowCardPadding),
                                         onClick = {
-                                            viewModel.fetchSearchVideosNextPage()
+                                            viewModel.searchVideos(searchVideosLP)
                                         }
                                     ) {
                                         Column(
@@ -343,9 +370,14 @@ fun SearchScreen(
                                     }
                                 }
                             }
+
+                            item {
+                                // 最后一行占位高度
+                                Spacer(modifier = Modifier.height(200.dp))
+                            }
                         }
                     }
-                    if (searchLoad.type == LazyType.LOADING) {
+                    if (searchVideosLP.type == LazyType.LOADING) {
                         LoadingScreen(model = true)
                     }
                 }

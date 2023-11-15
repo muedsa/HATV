@@ -13,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import com.muedsa.compose.tv.theme.TvTheme
-import com.muedsa.compose.tv.widget.AppCloseHandler
+import com.muedsa.compose.tv.widget.AppBackHandler
 import com.muedsa.compose.tv.widget.ErrorMessageBox
 import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.hatv.model.LazyType
@@ -33,8 +33,8 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         splashScreen.setKeepOnScreenCondition {
-            homePageViewModel.videosRowsDataState.value.type == LazyType.LOADING
-                    || searchViewModel.searchOptionsState.value.type == LazyType.LOADING
+            homePageViewModel.videosRowsLDSF.value.type == LazyType.LOADING
+                    || searchViewModel.searchOptionsLDSF.value.type == LazyType.LOADING
         }
         setContent {
 
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val errorMsgBoxState = remember { ErrorMessageBoxState() }
-                    AppCloseHandler {
+                    AppBackHandler {
                         errorMsgBoxState.error("再次点击返回键退出")
                     }
                     ErrorMessageBox(state = errorMsgBoxState) {

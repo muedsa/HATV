@@ -1,10 +1,10 @@
 package com.muedsa.hatv.repository
 
 import android.net.Uri
-import com.muedsa.hatv.model.PagedVideoInfoModel
-import com.muedsa.hatv.model.SearchOptionsModel
-import com.muedsa.hatv.model.VideoDetailModel
-import com.muedsa.hatv.model.VideosRowModel
+import com.muedsa.hatv.model.ha.PagedVideoInfoModel
+import com.muedsa.hatv.model.ha.SearchOptionsModel
+import com.muedsa.hatv.model.ha.VideoDetailModel
+import com.muedsa.hatv.model.ha.VideosRowModel
 import com.muedsa.hatv.util.parseHomePageBody
 import com.muedsa.hatv.util.parsePagedVideosFromSearchPage
 import com.muedsa.hatv.util.parseSearchOptionsFromSearchPage
@@ -34,7 +34,7 @@ class HARepositoryImpl : IHARepository {
     override fun fetchSearchVideos(
         query: String,
         genre: String,
-        tags: List<String>,
+        tags: Set<String>,
         page: Int
     ): PagedVideoInfoModel {
         val uriBuilder = Uri.parse(HAUrls.SEARCH).buildUpon()

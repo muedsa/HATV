@@ -3,12 +3,12 @@ package com.muedsa.hatv.util
 import android.net.UrlQuerySanitizer
 import androidx.compose.ui.util.fastJoinToString
 import androidx.core.text.isDigitsOnly
-import com.muedsa.hatv.model.PagedVideoInfoModel
-import com.muedsa.hatv.model.SearchOptionsModel
-import com.muedsa.hatv.model.SearchTagsRowModel
-import com.muedsa.hatv.model.VideoDetailModel
-import com.muedsa.hatv.model.VideoInfoModel
-import com.muedsa.hatv.model.VideosRowModel
+import com.muedsa.hatv.model.ha.PagedVideoInfoModel
+import com.muedsa.hatv.model.ha.SearchOptionsModel
+import com.muedsa.hatv.model.ha.SearchTagsRowModel
+import com.muedsa.hatv.model.ha.VideoDetailModel
+import com.muedsa.hatv.model.ha.VideoInfoModel
+import com.muedsa.hatv.model.ha.VideosRowModel
 import org.jsoup.nodes.Element
 import org.jsoup.select.Evaluator
 

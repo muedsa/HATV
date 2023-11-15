@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,7 +37,6 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.compose.tv.model.ContentModel
 import com.muedsa.compose.tv.theme.ScreenPaddingLeft
 import com.muedsa.compose.tv.widget.ContentBlock
@@ -50,12 +50,13 @@ import com.muedsa.compose.tv.widget.ScreenBackgroundType
 import com.muedsa.compose.tv.widget.StandardImageCardsRow
 import com.muedsa.compose.tv.widget.rememberScreenBackgroundState
 import com.muedsa.hatv.PlaybackActivity
+import com.muedsa.hatv.model.LazyPagedList
 import com.muedsa.hatv.model.LazyType
-import com.muedsa.hatv.model.VideoInfoModel
+import com.muedsa.hatv.model.SelectedSearchOptionsModel
 import com.muedsa.hatv.ui.navigation.NavigationItems
 import com.muedsa.hatv.viewmodel.SearchViewModel
 import com.muedsa.hatv.viewmodel.VideoDetailViewModel
-import timber.log.Timber
+import com.muedsa.uitl.LogUtil
 import java.lang.Integer.max
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -66,22 +67,22 @@ fun VideoDetailScreen(
     errorMsgBoxState: ErrorMessageBoxState,
     onNavigate: (NavigationItems, List<String>?) -> Unit = { _, _ -> }
 ) {
-    val videoDetailData by remember { viewModel.videoDetailDataState }
-
     val context = LocalContext.current
-
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
 
-    LaunchedEffect(key1 = videoDetailData.type, key2 = videoDetailData.error) {
-        if (videoDetailData.type == LazyType.FAILURE) {
-            errorMsgBoxState.error(videoDetailData.error)
+    val videoDetailLD by viewModel.videoDetailLDSF.collectAsState()
+
+    LaunchedEffect(key1 = videoDetailLD.type, key2 = videoDetailLD.error) {
+        if (videoDetailLD.type == LazyType.FAILURE) {
+            errorMsgBoxState.error(videoDetailLD.error)
         }
     }
-    if (videoDetailData.type == LazyType.SUCCESS) {
-        if (videoDetailData.data != null) {
-            val videoDetail = videoDetailData.data!!
+
+    if (videoDetailLD.type == LazyType.SUCCESS) {
+        if (videoDetailLD.data != null) {
+            val videoDetail = videoDetailLD.data!!
             val backgroundState = rememberScreenBackgroundState(
                 initUrl = videoDetail.image,
                 initType = ScreenBackgroundType.SCRIM
@@ -121,7 +122,7 @@ fun VideoDetailScreen(
                                     backgroundState.type = ScreenBackgroundType.SCRIM
                                 },
                             onClick = {
-                                FirebaseCrashlytics.getInstance().log(
+                                LogUtil.fd(
                                     "try play => \n" +
                                             "id: ${videoDetail.id} \n" +
                                             "title: ${videoDetail.title} \n" +
@@ -154,12 +155,13 @@ fun VideoDetailScreen(
                                 AssistChip(
                                     modifier = Modifier.padding(8.dp),
                                     onClick = {
-                                        Timber.d("click tag: $it")
+                                        LogUtil.d("click tag: $it")
                                         // to search screen
-                                        searchViewModel.resetSearch()
-                                        searchViewModel.addSearchTag(it)
-                                        searchViewModel.fetchSearchVideos()
-                                        onNavigate(NavigationItems.Home, listOf("1"))
+                                        SelectedSearchOptionsModel(tags = mutableSetOf(it)).let {
+                                            searchViewModel.selectedSearchOptionsSF.value = it
+                                            searchViewModel.searchVideos(LazyPagedList.new(it))
+                                            onNavigate(NavigationItems.Home, listOf("1"))
+                                        }
                                     }
                                 ) {
                                     Text(text = it)
@@ -186,27 +188,31 @@ fun VideoDetailScreen(
                             ),
                             title = "视频列表",
                             modelList = videoDetail.videoList,
-                            imageFn = VideoInfoModel::image,
-                            contentFn = { ContentModel(it.title, subtitle = it.author) },
+                            imageFn = { _, video -> video.image },
+                            contentFn = { _, video ->
+                                ContentModel(
+                                    title = video.title,
+                                    subtitle = video.author
+                                )
+                            },
                             onItemFocus = { _, video ->
                                 backgroundState.url = video.image
                                 backgroundState.type = ScreenBackgroundType.BLUR
                             },
                             onItemClick = { _, video ->
-                                Timber.d("Click $video")
-                                viewModel.videoIdLD.value = video.id
+                                LogUtil.d("Click $video")
+                                viewModel.videoIdSF.value = video.id
                             }
                         )
                     }
                 }
-
             }
         } else {
             EmptyDataScreen()
         }
-    } else if (videoDetailData.type == LazyType.FAILURE) {
+    } else if (videoDetailLD.type == LazyType.FAILURE) {
         ErrorScreen {
-            viewModel.videoIdLD.value = viewModel.videoIdLD.value
+            viewModel.videoIdSF.value = viewModel.videoIdSF.value
         }
     } else {
         LoadingScreen()

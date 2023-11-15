@@ -5,11 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import com.muedsa.compose.tv.theme.TvTheme
-import com.muedsa.compose.tv.widget.FillTextScreen
+import com.muedsa.compose.tv.widget.AppBackHandler
+import com.muedsa.compose.tv.widget.ErrorMessageBox
+import com.muedsa.compose.tv.widget.ErrorMessageBoxState
 import com.muedsa.hatv.ui.features.playback.PlaybackScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,12 +32,21 @@ class PlaybackActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    if (mediaUrl.isNullOrEmpty()) {
-                        FillTextScreen(context = "视频地址错误")
-                    } else {
-                        PlaybackScreen(mediaUrl = mediaUrl)
+
+                    val errorMsgBoxState = remember { ErrorMessageBoxState() }
+                    AppBackHandler {
+                        errorMsgBoxState.error("再次点击返回键退出")
                     }
-                    
+                    ErrorMessageBox(state = errorMsgBoxState) {
+                        if (mediaUrl.isNullOrEmpty()) {
+                            PlaybackScreen(mediaUrl = mediaUrl!!)
+                        }
+                    }
+                    LaunchedEffect(key1 = mediaUrl) {
+                        if (mediaUrl.isNullOrEmpty()) {
+                            errorMsgBoxState.error("视频地址错误")
+                        }
+                    }
                 }
             }
         }

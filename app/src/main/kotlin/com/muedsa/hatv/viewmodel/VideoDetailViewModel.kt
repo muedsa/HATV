@@ -1,19 +1,21 @@
 package com.muedsa.hatv.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.muedsa.hatv.model.LazyData
-import com.muedsa.hatv.model.LazyType
-import com.muedsa.hatv.model.VideoDetailModel
 import com.muedsa.hatv.repository.IHARepository
+import com.muedsa.uitl.LogUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,42 +24,29 @@ class VideoDetailViewModel @Inject constructor(
     private val repo: IHARepository
 ) : ViewModel() {
 
-    val videoIdLD = savedStateHandle.getLiveData<String?>(VIDEO_ID_SAVED_STATE_KEY, null)
-    val videoDetailDataState = mutableStateOf<LazyData<VideoDetailModel>>(LazyData.init())
+    private val _navVideoIdFlow = savedStateHandle.getStateFlow(VIDEO_ID_SAVED_STATE_KEY, "0")
+    val videoIdSF = MutableStateFlow(_navVideoIdFlow.value)
 
-    private fun fetchVideoDetail(videoId: String) {
-        clearVideoDetail()
-        viewModelScope.launch(context = Dispatchers.IO) {
-            try {
-                repo.fetchVideoDetail(videoId).let {
-                    videoDetailDataState.value = LazyData.success(it)
-                }
-            } catch (t: Throwable) {
-                Timber.d(t)
-                withContext(Dispatchers.Main) {
-                    videoDetailDataState.value = LazyData.fail(t)
-                }
-                FirebaseCrashlytics.getInstance().recordException(t)
-            }
-        }
-    }
-
-    private fun clearVideoDetail() {
-        if (videoDetailDataState.value.type != LazyType.LOADING) {
-            videoDetailDataState.value = LazyData.init()
-        }
-    }
+    val videoDetailLDSF = videoIdSF.map {
+        LazyData.success(withContext(Dispatchers.IO) {
+            repo.fetchVideoDetail(it)
+        })
+    }.catch {
+        LogUtil.d(it)
+        emit(LazyData.fail(it))
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = LazyData.init()
+    )
 
     init {
-        Timber.d("VideoDetailViewModel init")
         viewModelScope.launch {
-            Timber.d("VideoDetailViewModel init viewModelScope launch")
-            videoIdLD.observeForever {
-                it?.let {
-                    fetchVideoDetail(it)
-                }
+            _navVideoIdFlow.collectLatest {
+                videoIdSF.value = it
             }
         }
+
     }
 
     companion object {
