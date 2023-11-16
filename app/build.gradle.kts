@@ -153,7 +153,7 @@ dependencies {
     implementation(libs.media3.ui)
     implementation(libs.media3.hls)
 
-    implementation(libs.akdanmaku)
+    // implementation(libs.akdanmaku)
 
     implementation(libs.jsoup)
 

@@ -1,11 +1,7 @@
 package com.muedsa.compose.tv.widget.player
 
-import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
-import android.view.Gravity
 import android.view.KeyEvent
-import android.widget.FrameLayout
-import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -29,7 +25,6 @@ import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -41,171 +36,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.Player
 import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.util.EventLogger
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.kuaishou.akdanmaku.DanmakuConfig
-import com.kuaishou.akdanmaku.render.SimpleRenderer
-import com.kuaishou.akdanmaku.ui.DanmakuPlayer
-import com.kuaishou.akdanmaku.ui.DanmakuView
 import com.muedsa.compose.tv.widget.OutlinedIconBox
 import kotlinx.coroutines.delay
 import java.util.Date
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
-
-@SuppressLint("OpaqueUnitKey")
-@OptIn(UnstableApi::class)
-@Composable
-fun DanmakuVideoPlayer(
-    debug: Boolean = false,
-    danmakuConfigSetting: DanmakuConfig.() -> Unit = {},
-    danmakuPlayerInit: DanmakuPlayer.() -> Unit = {},
-    videoPlayerBuilderSetting: ExoPlayer.Builder.() -> Unit = {},
-    videoPlayerInit: ExoPlayer.() -> Unit,
-) {
-
-    val context = LocalContext.current
-
-    val playerControlTicker = remember { mutableIntStateOf(0) }
-
-    val danmakuConfig = remember {
-        DanmakuConfig().apply(danmakuConfigSetting)
-    }
-
-    val danmakuPlayer = remember {
-        DanmakuPlayer(SimpleRenderer())
-    }
-
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context)
-            .also(videoPlayerBuilderSetting)
-            .build()
-            .also {
-                if (debug) {
-                    it.addAnalyticsListener(EventLogger())
-                }
-                it.addListener(object : Player.Listener {
-                    override fun onIsPlayingChanged(isPlaying: Boolean) {
-                        if (isPlaying) {
-                            danmakuPlayer.seekTo(it.currentPosition)
-                            danmakuPlayer.start(danmakuConfig)
-                        } else {
-                            danmakuPlayer.pause()
-                        }
-                    }
-                })
-                it.videoPlayerInit()
-            }
-    }
-
-    BackHandler(enabled = playerControlTicker.intValue > 0) {
-        playerControlTicker.intValue = 0
-    }
-
-    DisposableEffect(
-        Box(modifier = Modifier.fillMaxSize()) {
-            AndroidView(factory = {
-                PlayerView(context).apply {
-                    hideController()
-                    useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    player = exoPlayer
-                    layoutParams = FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        Gravity.CENTER
-                    )
-                }
-            })
-            AndroidView(factory = {
-                DanmakuView(context).apply {
-                    layoutParams = FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
-                    )
-                }.also {
-                    danmakuPlayer.bindView(it)
-                    danmakuPlayer.danmakuPlayerInit()
-                }
-            })
-        }
-
-    ) {
-        onDispose {
-            exoPlayer.release()
-            danmakuPlayer.release()
-        }
-    }
-
-    PlayerControl(debug = debug, player = exoPlayer, state = playerControlTicker)
-}
-
-@SuppressLint("OpaqueUnitKey")
-@OptIn(UnstableApi::class)
-@Composable
-fun SimpleVideoPlayer(
-    debug: Boolean = false,
-    playerBuilderSetting: ExoPlayer.Builder.() -> Unit = {},
-    playerInit: ExoPlayer.() -> Unit
-) {
-    val context = LocalContext.current
-
-    val playerControlTicker = remember { mutableIntStateOf(0) }
-
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context)
-            .also(playerBuilderSetting)
-            .build()
-            .also {
-                if (debug) {
-                    it.addAnalyticsListener(EventLogger())
-                }
-                it.playerInit()
-            }
-    }
-
-    BackHandler(enabled = playerControlTicker.intValue > 0) {
-        playerControlTicker.intValue = 0
-    }
-
-    DisposableEffect(
-        AndroidView(factory = {
-            PlayerView(context).apply {
-                hideController()
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                player = exoPlayer
-                layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    Gravity.CENTER
-                )
-            }
-        })
-    ) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
-
-    PlayerControl(debug = debug, player = exoPlayer, state = playerControlTicker)
-}
 
 @kotlin.OptIn(ExperimentalTvMaterial3Api::class)
 @OptIn(UnstableApi::class)
