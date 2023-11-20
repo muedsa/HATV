@@ -105,7 +105,10 @@ android {
     }
 
     testOptions {
-        unitTests.isReturnDefaultValues = true
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
     }
 }
 
@@ -163,6 +166,7 @@ dependencies {
     implementation(libs.okhttp3.logging)
 
     testImplementation(libs.junit4)
+    testImplementation(libs.android.test)
     testImplementation(libs.robolectric)
 
     implementation(platform(libs.firebase.bom))
