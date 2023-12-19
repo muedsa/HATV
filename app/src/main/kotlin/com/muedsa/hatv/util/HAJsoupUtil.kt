@@ -120,7 +120,7 @@ fun parseWatchPageBody(body: Element): VideoDetailModel {
     val posterImage = videoEl.attr("poster")
     val videoSourceELs = videoEl.select("source[src]")
     val playUrl = if (videoSourceELs.isNotEmpty()) {
-        val videoSourceEl = videoEl.select("source[src]").maxBy {
+        val videoSourceEl = videoEl.select("source[src]").maxByOrNull {
             it.attr("size").toIntOrNull() ?: 0
         }
         videoSourceEl?.attr("src")!!
