@@ -23,7 +23,7 @@ import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -261,7 +261,7 @@ fun SearchScreen(
                                         }
                                     }
                                 }
-                                Divider(modifier = Modifier.padding(bottom = 10.dp))
+                                HorizontalDivider(modifier = Modifier.padding(bottom = 10.dp))
                             }
                             items(
                                 items = searchOptions.tagsRows,
@@ -310,7 +310,7 @@ fun SearchScreen(
                                         }
                                     }
                                 }
-                                Divider(modifier = Modifier.padding(bottom = 10.dp))
+                                HorizontalDivider(modifier = Modifier.padding(bottom = 10.dp))
                             }
                         }
                     }
