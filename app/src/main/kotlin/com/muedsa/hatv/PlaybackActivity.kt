@@ -45,8 +45,8 @@ class PlaybackActivity : ComponentActivity() {
                         errorMsgBoxState.error("再次点击返回键退出")
                     }
                     ErrorMessageBox(state = errorMsgBoxState) {
-                        if (mediaUrl.isNullOrEmpty()) {
-                            PlaybackScreen(mediaUrl = mediaUrl!!)
+                        if (!mediaUrl.isNullOrEmpty()) {
+                            PlaybackScreen(mediaUrl = mediaUrl)
                         }
                     }
                     LaunchedEffect(key1 = mediaUrl) {
