@@ -122,7 +122,7 @@ fun VideoDetailScreen(
                                     backgroundState.type = ScreenBackgroundType.SCRIM
                                 },
                             onClick = {
-                                LogUtil.fd(
+                                LogUtil.fb(
                                     "try play => \n" +
                                             "id: ${videoDetail.id} \n" +
                                             "title: ${videoDetail.title} \n" +

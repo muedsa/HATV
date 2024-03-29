@@ -37,7 +37,7 @@ class HomePageViewModel @Inject constructor(
                 LazyData.success(it)
             }
         } catch (t: Throwable) {
-            LogUtil.fd(t)
+            LogUtil.fb(t)
             LazyData.fail(t)
         }
     }

@@ -61,7 +61,7 @@ class SearchViewModel @Inject constructor(
                 lp.successNext(it.videos, it.maxPage)
             }
         } catch (t: Throwable) {
-            LogUtil.fd(t)
+            LogUtil.fb(t)
             lp.failNext(t)
         }
     }
@@ -81,7 +81,7 @@ class SearchViewModel @Inject constructor(
                 LazyData.success(it)
             }
         } catch (t: Throwable) {
-            LogUtil.fd(t)
+            LogUtil.fb(t)
             LazyData.fail(t)
         }
     }

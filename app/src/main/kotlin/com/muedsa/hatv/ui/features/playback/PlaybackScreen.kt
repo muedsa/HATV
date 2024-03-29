@@ -19,12 +19,12 @@ fun PlaybackScreen(
     val errorMessageBoxState = remember { ErrorMessageBoxState() }
     ErrorMessageBox(state = errorMessageBoxState) {
         SimpleVideoPlayer(debug = BuildConfig.DEBUG) {
-            LogUtil.fd("exoplayer mediaUrl: $mediaUrl")
+            LogUtil.fb("exoplayer mediaUrl: $mediaUrl")
             addListener(object : Player.Listener {
                 override fun onPlayerErrorChanged(error: PlaybackException?) {
                     errorMessageBoxState.error(error, SnackbarDuration.Long)
                     error?.let {
-                        LogUtil.fd(it)
+                        LogUtil.fb(it)
                     }
                 }
             })
