@@ -1,5 +1,6 @@
 package com.muedsa.compose.tv.widget
 
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -12,8 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
@@ -31,7 +34,6 @@ import com.muedsa.compose.tv.theme.HorizontalPosterSize
 import com.muedsa.compose.tv.theme.ImageCardRowCardPadding
 import com.muedsa.compose.tv.theme.TvTheme
 import com.muedsa.compose.tv.theme.VerticalPosterSize
-import com.muedsa.uitl.LogUtil
 import com.muedsa.uitl.anyMatchWithIndex
 
 
@@ -49,12 +51,8 @@ fun <T> ImageCardsRow(
     onItemFocus: (index: Int, item: T) -> Unit = { _, _ -> },
     onItemClick: (index: Int, item: T) -> Unit = { _, _ -> }
 ) {
-
-    val focusRequester = remember { FocusRequester() }
-
-    val firstItemFocusRequester = remember { FocusRequester() }
-
-    Column(modifier) {
+    val (lazyRowFR, firstItemFR) = remember { FocusRequester.createRefs() }
+    Column(modifier.focusGroup()) {
         Text(
             modifier = Modifier.padding(start = ImageCardRowCardPadding),
             text = title,
@@ -65,22 +63,8 @@ fun <T> ImageCardsRow(
         Spacer(modifier = Modifier.height(ImageCardRowCardPadding))
         TvLazyRow(
             modifier = Modifier
-                .focusRequester(focusRequester)
-                .focusProperties {
-                    exit = { focusRequester.saveFocusedChild(); FocusRequester.Default }
-                    enter = {
-                        if (focusRequester.restoreFocusedChild()) {
-                            LogUtil.d("row restoreFocusedChild")
-                            FocusRequester.Cancel
-                        } else if (modelList.isNotEmpty() && state.firstVisibleItemIndex == 0) {
-                            LogUtil.d("row focused first Child")
-                            firstItemFocusRequester
-                        } else {
-                            LogUtil.d("row focused default child")
-                            FocusRequester.Default
-                        }
-                    }
-                },
+                .focusRequester(lazyRowFR)
+                .focusRestorer { firstItemFR },
             state = state,
             contentPadding = PaddingValues(
                 start = ImageCardRowCardPadding,
@@ -91,7 +75,7 @@ fun <T> ImageCardsRow(
             modelList.forEachIndexed { index, it ->
                 var itemModifier = Modifier.padding(end = ImageCardRowCardPadding)
                 if (index == 0) {
-                    itemModifier = itemModifier.focusRequester(firstItemFocusRequester)
+                    itemModifier = itemModifier.focusRequester(firstItemFR)
                 }
                 item(key = if (it is KeyModel) it.key else null) {
                     ImageContentCard(
@@ -102,7 +86,10 @@ fun <T> ImageCardsRow(
                         type = CardType.COMPACT,
                         model = contentFn(index, it),
                         onItemFocus = { onItemFocus(index, it) },
-                        onItemClick = { onItemClick(index, it) }
+                        onItemClick = {
+                            lazyRowFR.saveFocusedChild()
+                            onItemClick(index, it)
+                        }
                     )
                 }
             }
@@ -128,17 +115,14 @@ fun <T> StandardImageCardsRow(
     onItemFocus: (index: Int, item: T) -> Unit = { _, _ -> },
     onItemClick: (index: Int, item: T) -> Unit = { _, _ -> }
 ) {
-    val focusRequester = remember { FocusRequester() }
-
-    val firstItemFocusRequester = remember { FocusRequester() }
-
+    val (lazyRowFR, firstItemFR) = remember { FocusRequester.createRefs() }
     val rowBottomPadding =
         if (modelList.isNotEmpty() && modelList.anyMatchWithIndex { index, item ->
                 contentFn(index, item) != null
             }) ImageCardRowCardPadding - CardContentPadding
         else ImageCardRowCardPadding
 
-    Column(modifier) {
+    Column(modifier.focusGroup()) {
         Text(
             modifier = Modifier.padding(start = ImageCardRowCardPadding),
             text = title,
@@ -149,22 +133,8 @@ fun <T> StandardImageCardsRow(
         Spacer(modifier = Modifier.height(10.dp))
         TvLazyRow(
             modifier = Modifier
-                .focusRequester(focusRequester)
-                .focusProperties {
-                    exit = { focusRequester.saveFocusedChild(); FocusRequester.Default }
-                    enter = {
-                        if (focusRequester.restoreFocusedChild()) {
-                            LogUtil.d("row restoreFocusedChild")
-                            FocusRequester.Cancel
-                        } else if (modelList.isNotEmpty() && state.firstVisibleItemIndex == 0) {
-                            LogUtil.d("row focused first Child")
-                            firstItemFocusRequester
-                        } else {
-                            LogUtil.d("row focused default child")
-                            FocusRequester.Default
-                        }
-                    }
-                },
+                .focusRequester(lazyRowFR)
+                .focusRestorer { firstItemFR },
             state = state,
             contentPadding = PaddingValues(
                 start = ImageCardRowCardPadding,
@@ -176,7 +146,7 @@ fun <T> StandardImageCardsRow(
                 item(key = if (it is KeyModel) it.key else null) {
                     var itemModifier = Modifier.padding(end = ImageCardRowCardPadding)
                     if (index == 0) {
-                        itemModifier = itemModifier.focusRequester(firstItemFocusRequester)
+                        itemModifier = itemModifier.focusRequester(firstItemFR)
                     }
                     ImageContentCard(
                         modifier = itemModifier,
@@ -186,7 +156,10 @@ fun <T> StandardImageCardsRow(
                         type = CardType.STANDARD,
                         model = contentFn(index, it),
                         onItemFocus = { onItemFocus(index, it) },
-                        onItemClick = { onItemClick(index, it) }
+                        onItemClick = {
+                            lazyRowFR.saveFocusedChild()
+                            onItemClick(index, it)
+                        }
                     )
                 }
             }
